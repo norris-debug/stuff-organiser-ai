@@ -174,6 +174,9 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     _notesController.dispose();
     _venueController.dispose();
     _speech?.stop();
+    // v0.8.6: the scan flow is the only screen that opens the web camera
+    // sheet, so it owns the full release of the shared camera session.
+    releaseWebCamera();
     super.dispose();
   }
 
