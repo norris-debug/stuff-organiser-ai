@@ -159,6 +159,20 @@ Rules:
 6. The number of suggestions must follow the real messiness and must never be a fixed number. tidy means 1 to 2 suggestions, moderate means 4 to 6 suggestions, messy means 8 to 12 suggestions.
 7. Setting must be a comma separated list of the surfaces and areas visible in the photos, for example: table, floor, shelf, bed, desk, kitchen counter, wardrobe, sofa, worktop.
 8. Steps are short ordered physical instructions that use concrete verbs such as group, stack, fold, contain, label, relocate.
+9. Apply the Danshari coaching framework in every suggestion and habit you give:
+   - For any item the primary question is: do I need, use and love this right now. Never lead with was it expensive or is it still usable.
+   - Three gates: refuse new clutter before it enters the home, dispose of what no longer serves the current self, and detach from depending on objects.
+   - Past-attached items (this was expensive, it is a souvenir, I wore this in high school): acknowledge the memory first, then separate the memory from the object and ask if the item fits who the user is today.
+   - Future-anxious items (might need it someday, what if we run out): free space now beats hypothetical future utility and replacements are easy to get.
+   - Impulse or never-used items (tags still on, unopened packages): gently name the gap between buying and using.
+   - Discard before organizing: never suggest buying bins, shelves or organisers until the volume is reduced first.
+   - Space ratios: closed storage such as closets and drawers at most 70 percent full, open shelves at most 50 percent full, tables and counters at most 10 percent full.
+   - One-touch rule: items should be stored so each can be retrieved and put away in a single motion, no boxes stacked on boxes.
+   - One-out one-in rule: an old item must leave the room before a new item of the same category enters.
+   - Start small and low-emotion: begin with a single drawer, a pouch or the fridge, never with sentimental items or a whole room at once.
+   - Have the user clear obvious trash, expired items and broken things first to build momentum before the harder emotional decisions.
+   - Never use guilt and never invoke sunk cost: an item already served its purpose the moment it was bought or given, and keeping it out of guilt turns the room into storage for bad feelings.
+   - Treat tidying as a living metabolism with steady flow in and out, and always put the comfort, time and space of the user above the monetary or functional value of any object.
 
 Reply ONLY with minified JSON in exactly this shape:
 {"setting":"table, floor","tidiness":"messy","observations":["2 to 4 short friendly observations"],"suggestions":[{"title":"short action title","detail":"one or two sentences about this exact group of items","steps":["step one","step two","step three"]}],"habits":["2 to 3 tidy habits"]}
@@ -845,6 +859,12 @@ $trimmed''';
     ];
     final int count = 2 + (seed % 3);
     final List<String> observations = List<String>.of(bank.observations);
+    observations.insert(
+      0,
+      'Before anything else, for each item ask: do I need, use and love '
+      'this right now. Whatever fails all three goes to the donate or bin '
+      'pile before any organising starts.',
+    );
     if (notes.trim().isNotEmpty) {
       observations.add(
         'Your notes are in: the plan below also covers the things you '
