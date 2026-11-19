@@ -1,5 +1,9 @@
 import 'dart:convert';
+// dart:html is deprecated but still fully supported for Flutter 3.29 web
+// builds; swap to package:web + dart:js_interop in a later cleanup pass.
+// ignore: deprecated_member_use
 import 'dart:html' as html;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -87,6 +91,7 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
         ..style.width = '100%'
         ..style.height = '100%'
         ..append(video);
+      // ignore: undefined_prefixed_name
       ui.platformViewRegistry.registerViewFactory(
         _viewId,
         (int viewId) => container,
@@ -116,8 +121,10 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
         width: video.videoWidth,
         height: video.videoHeight,
       );
-      canvas.context2d.drawImage(video, 0, 0);
-      final String dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      final html.CanvasRenderingContext2D ctx =
+          canvas.getContext('2d') as html.CanvasRenderingContext2D;
+      ctx.drawImage(video, 0, 0);
+      final String dataUrl = canvas.toDataUrl('image/jpeg', 0.9);
       final int splitAt = dataUrl.indexOf(',');
       if (splitAt < 0) throw StateError('bad data url');
       final Uint8List bytes = base64Decode(dataUrl.substring(splitAt + 1));

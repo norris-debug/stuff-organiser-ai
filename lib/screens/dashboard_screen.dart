@@ -67,6 +67,7 @@ class DashboardScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 64,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -74,6 +75,12 @@ class DashboardScreen extends StatelessWidget {
             Text(
               state.user?.displayLabel ?? 'Guest',
               style: theme.textTheme.bodySmall,
+            ),
+            Text(
+              'v0.6.4+12',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.outline,
+              ),
             ),
           ],
         ),
