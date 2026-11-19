@@ -59,20 +59,46 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
   Widget _bubble(BuildContext context, _ChatLine line) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme scheme = theme.colorScheme;
+    // v0.8.7: the photo bubble shows EVERY uploaded angle as a labelled
+    // strip. The old single-image bubble showed only the first photo,
+    // which read as the app ignoring the rest of the scan.
     if (line.isPhoto) {
-      final Uint8List? bytes = _photos.isEmpty ? null : _photos.first.bytes;
-      if (bytes == null) return const SizedBox.shrink();
+      if (_photos.isEmpty) return const SizedBox.shrink();
       return Align(
         alignment: Alignment.center,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.memory(
-              bytes,
-              width: 220,
-              height: 220,
-              fit: BoxFit.cover,
+          child: SizedBox(
+            height: 142,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              itemCount: _photos.length,
+              separatorBuilder: (BuildContext context, int index) =>
+                  const SizedBox(width: 8),
+              itemBuilder: (BuildContext context, int index) {
+                final _PhotoItem photo = _photos[index];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.memory(
+                        photo.bytes,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        gaplessPlayback: true,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      index == 0 ? 'Main' : 'Angle ${index + 1}',
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),
