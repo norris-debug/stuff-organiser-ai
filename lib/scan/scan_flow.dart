@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ part 'scan_flow_ui1.dart';
 part 'scan_flow_ui2.dart';
 part 'scan_flow_ui3.dart';
 part 'scan_flow_thinking.dart';
+part 'scan_flow_loader.dart';
 
 /// Scan feature (v0.7.0).
 ///
