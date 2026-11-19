@@ -32,3 +32,51 @@ jobs:
         with:
           name: stuff-organiser-ai-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
+
+  web-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      administration: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.29.3
+          channel: stable
+
+      - name: Generate web platform files
+        run: flutter create --platforms=web --org com.stufforganiser .
+
+      - run: flutter pub get
+      - run: flutter build web --release --base-href=/stuff-organiser-ai/
+
+      - name: Pull the APK built by the Android job into the web deployment
+        uses: actions/download-artifact@v4
+        with:
+          name: stuff-organiser-ai-debug-apk
+          path: apk
+
+      - name: Publish APK alongside the web app
+        run: cp apk/app-debug.apk build/web/stuff-organiser-ai-debug.apk
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
