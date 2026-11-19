@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.4+24
+version: 0.8.5+25
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -30,7 +30,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# 2026-11-19 14:40Z: CI retry commit after a Gradle Plugin Portal hiccup
-# stalled runs #65/#66/#67 (kotlin-stdlib 1.9.24 could not be resolved from
-# plugins.gradle.org on one runner; analyze passed clean). No dependency or
-# code changes - this comment only exists to re-trigger the build pipeline.
+# v0.8.5+25: coach chat drafts from the recognition lane's object list
+# (paste intake on the interim route) instead of the canned demo script;
+# otter and cat whisker dots removed per the closed mascot ruling.
