@@ -14,7 +14,7 @@ extension _ScanAnalyze on _ScanFlowScreenState {
     final int runId = ++_runId;
     final String notes = _notesController.text.trim();
 
-    setState(() {
+    _setUiState(() {
       _analyzing = true;
       _error = null;
       _lines = <_ChatLine>[];
@@ -28,7 +28,7 @@ extension _ScanAnalyze on _ScanFlowScreenState {
     final _ScanPlan plan = _demoPlan(_photos, notes);
 
     if (!mounted || runId != _runId) return;
-    setState(() {
+    _setUiState(() {
       _plan = plan;
       _analyzing = false;
     });

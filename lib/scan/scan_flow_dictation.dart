@@ -3,7 +3,7 @@ part of 'scan_flow.dart';
 extension _ScanDictation on _ScanFlowScreenState {
   Future<void> _toggleDictation() async {
     if (_listening) {
-      setState(() {
+      _setUiState(() {
         _listening = false;
       });
       await _stopListening();
@@ -64,7 +64,7 @@ extension _ScanDictation on _ScanFlowScreenState {
       return;
     }
     if (!mounted) return;
-    setState(() {
+    _setUiState(() {
       _listening = true;
     });
   }
@@ -82,7 +82,7 @@ extension _ScanDictation on _ScanFlowScreenState {
   void _onSpeechStatus(String status) {
     if (!mounted) return;
     if (status == speech.SpeechToText.notListeningStatus && _listening) {
-      setState(() {
+      _setUiState(() {
         _listening = false;
       });
     }
@@ -92,7 +92,7 @@ extension _ScanDictation on _ScanFlowScreenState {
     final String recognized = recognizedWords.trim();
     if (recognized.isEmpty) return;
     if (!mounted) return;
-    setState(() {
+    _setUiState(() {
       _notesController.text = _dictationBase.isEmpty
           ? recognized
           : '$_dictationBase $recognized';

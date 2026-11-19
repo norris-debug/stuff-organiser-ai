@@ -83,16 +83,14 @@ class _ScanPlan {
   const _ScanPlan({
     required this.observations,
     required this.habits,
-    this.setting = '',
-    this.tidiness = '',
     this.suggestions = const <_Suggestion>[],
   });
 
   /// Comma separated list of the surfaces and areas visible in the photo.
-  final String setting;
+  final String setting = '';
 
   /// tidy | moderate | messy (empty when it could not be detected).
-  final String tidiness;
+  final String tidiness = '';
 
   final List<String> observations;
   final List<_Suggestion> suggestions;
@@ -123,18 +121,19 @@ class _PhotoItem {
   final String mime;
 }
 
+/// Maximum photos per scan: the main shot plus five extra angles.
+const int _maxPhotos = 6;
+
+/// Interjections the coach drops between suggestions.
+const List<String> _interjections = <String>[
+  'Makes sense.',
+  'That one I can do right now.',
+  'Good tip.',
+  'Noted, next one.',
+  'Okay, next.',
+];
+
 class _ScanFlowScreenState extends State<ScanFlowScreen> {
-  /// Maximum photos per scan: the main shot plus five extra angles.
-  static const int _maxPhotos = 6;
-
-  static const List<String> _interjections = <String>[
-    'Makes sense.',
-    'That one I can do right now.',
-    'Good tip.',
-    'Noted, next one.',
-    'Okay, next.',
-  ];
-
   final ImagePicker _picker = ImagePicker();
   final ScrollController _chatScroll = ScrollController();
   final TextEditingController _notesController = TextEditingController();
@@ -168,6 +167,13 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     _notesController.dispose();
     _speech?.stop();
     super.dispose();
+  }
+
+  /// Rebuild wrapper for the part-file extensions: they sit outside the
+  /// State subclass, where calling setState directly is a protected-member
+  /// violation.
+  void _setUiState(VoidCallback fn) {
+    setState(fn);
   }
 
   String get _stageTitle => switch (_stage) {

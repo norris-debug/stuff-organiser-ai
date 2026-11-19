@@ -8,7 +8,7 @@ extension _ScanAfterPhoto on _ScanFlowScreenState {
     final String url = _pollinationsUrl(plan, first?.bytes);
     await Future<void>.delayed(const Duration(milliseconds: 1200));
     if (!mounted || runId != _runId) return;
-    setState(() {
+    _setUiState(() {
       _afterBytes = null;
       _afterUrl = url;
       _afterLoading = false;
