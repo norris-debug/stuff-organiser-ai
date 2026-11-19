@@ -23,15 +23,6 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (!allRevealed)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: _ThinkingLine(
-                      mascot: widget.mascot,
-                      pack: widget.pack,
-                      compact: true,
-                    ),
-                  ),
                 if (allRevealed)
                   FilledButton.icon(
                     onPressed: _openResult,
@@ -181,17 +172,17 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
           children: <Widget>[
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: _copyPlan,
-                icon: const Icon(Icons.copy_all_outlined),
-                label: const Text('Copy all'),
+                onPressed: _saveThenNewRound,
+                icon: const Icon(Icons.add_a_photo_outlined),
+                label: const Text('Scan another room'),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: FilledButton.icon(
-                onPressed: _resetFlow,
-                icon: const Icon(Icons.add_a_photo_outlined),
-                label: const Text('Scan another room'),
+                onPressed: _saveThenHome,
+                icon: const Icon(Icons.home_outlined),
+                label: const Text('Return to homepage'),
               ),
             ),
           ],
