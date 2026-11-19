@@ -64,12 +64,18 @@ class _ChatLine {
     this.isUser = false,
     this.isPhoto = false,
     this.isHeading = false,
+    this.isConfirmation = false,
   });
 
   final String text;
   final bool isUser;
   final bool isPhoto;
   final bool isHeading;
+
+  /// v0.8.9: the coach asks the user to confirm or correct something on
+  /// this line, so the chat shows a reply bar while it is the latest
+  /// revealed line and still unanswered.
+  final bool isConfirmation;
 }
 
 /// One concrete, physical action the coach proposes.
@@ -157,6 +163,39 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
 
   /// v0.8.5: true while the coach chat waits for the recognized list.
   bool _awaitingRecognition = false;
+
+  /// v0.8.9: coach confirmation replies. The reply bar shows when the
+  /// latest revealed line asks the user to confirm or correct something;
+  /// the answer lands as a user bubble right after that line.
+  final TextEditingController _chatReplyController = TextEditingController();
+  final Set<int> _answeredConfirmations = <int>{};
+
+  bool get _showChatReplyBar {
+    if (_stage != _ScanStage.chat) return false;
+    if (_revealed <= 0 || _revealed > _lines.length) return false;
+    final _ChatLine last = _lines[_revealed - 1];
+    return last.isConfirmation &&
+        !_answeredConfirmations.contains(_revealed - 1);
+  }
+
+  /// Sends the user's reply to a coach confirmation. The reply is added
+  /// as a user bubble directly after the confirmation line so the chat
+  /// keeps its order, then that line stops asking.
+  void _submitChatReply() {
+    final String text = _chatReplyController.text.trim();
+    if (text.isEmpty) return;
+    if (!_showChatReplyBar) return;
+    final int at = _revealed - 1;
+    final List<_ChatLine> lines = <_ChatLine>[..._lines];
+    lines.insert(at + 1, _ChatLine(text: text, isUser: true));
+    _answeredConfirmations.add(at);
+    _setUiState(() {
+      _lines = lines;
+      _revealed++;
+      _chatReplyController.clear();
+    });
+    _scrollToBottom();
+  }
   String? _error;
   List<_ChatLine> _lines = <_ChatLine>[];
   int _revealed = 0;
@@ -175,6 +214,7 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     _chatScroll.dispose();
     _notesController.dispose();
     _venueController.dispose();
+    _chatReplyController.dispose();
     _speech?.stop();
     // v0.8.6: the scan flow is the only screen that opens the web camera
     // sheet, so it owns the full release of the shared camera session.
@@ -327,6 +367,8 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
       _error = null;
       _analyzing = false;
       _awaitingRecognition = false;
+      _chatReplyController.clear();
+      _answeredConfirmations.clear();
     });
   }
 }
