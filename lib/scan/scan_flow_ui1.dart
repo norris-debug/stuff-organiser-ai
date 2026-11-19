@@ -33,6 +33,38 @@ extension _ScanPickUi on _ScanFlowScreenState {
           style: theme.textTheme.bodyMedium,
         ),
         const SizedBox(height: 16),
+        Text(
+          'Where are you tidying? (optional)',
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _venueController,
+          textCapitalization: TextCapitalization.sentences,
+          maxLines: 1,
+          decoration: const InputDecoration(
+            hintText: 'e.g. dining room, bedroom, living room',
+            border: OutlineInputBorder(),
+            isDense: true,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: <Widget>[
+            for (final String venue in <String>[
+              'Dining room',
+              'Bedroom',
+              'Living room',
+            ])
+              ActionChip(
+                label: Text(venue),
+                onPressed: () => _venueController.text = venue,
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
         if (hasPhotos) ...<Widget>[
           _photoStrip(context),
           const SizedBox(height: 12),
