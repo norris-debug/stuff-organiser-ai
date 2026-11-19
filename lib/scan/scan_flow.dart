@@ -13,12 +13,14 @@ import 'package:speech_to_text/speech_to_text.dart' as speech;
 import '../theme/app_theme.dart';
 import '../widgets/mascot_widget.dart';
 import 'web_camera.dart';
+import 'web_keyboard.dart';
 
 part 'scan_flow_capture.dart';
 part 'scan_flow_dictation.dart';
 part 'scan_flow_analyze.dart';
 part 'scan_flow_after.dart';
 part 'scan_flow_recognition.dart';
+part 'scan_flow_recognition_flow.dart';
 part 'scan_flow_chat.dart';
 part 'scan_flow_ui1.dart';
 part 'scan_flow_ui2.dart';
