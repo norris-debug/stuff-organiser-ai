@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/space.dart';
+import '../scan/scan_flow.dart';
 import '../services/plan_engine.dart';
 import '../state/app_state.dart';
 import '../widgets/mascot_widget.dart';
@@ -89,6 +90,8 @@ class DashboardScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
           children: <Widget>[
             _GreetingCard(state: state),
+            const SizedBox(height: 16),
+            const _ScanCard(),
             const SizedBox(height: 16),
             _PlanCard(plan: plan, onStart: onOpenPlan),
             const SizedBox(height: 20),
@@ -316,6 +319,63 @@ class _EmptySpaces extends StatelessWidget {
             FilledButton(
               onPressed: () => showAddSpaceDialog(context),
               child: const Text('Add space'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Prominent Scan entry on the home dashboard.
+class _ScanCard extends StatelessWidget {
+  const _ScanCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppState state = context.read<AppState>();
+    final ThemeData theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.photo_camera_outlined),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Room scan', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Snap a photo and the coach chats you through tidying it.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            FilledButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => ScanFlowScreen(
+                    prefs: state.prefs,
+                    mascot: state.mascot,
+                    pack: state.themePack,
+                  ),
+                ),
+              ),
+              child: const Text('Scan'),
             ),
           ],
         ),
