@@ -142,9 +142,7 @@ extension _ScanPickUi on _ScanFlowScreenState {
         ],
         if (_analyzing) ...<Widget>[
           const SizedBox(height: 20),
-          const LinearProgressIndicator(),
-          const SizedBox(height: 12),
-          _ThinkingLine(mascot: widget.mascot, pack: widget.pack),
+          RenderLoader(mascot: widget.mascot, pack: widget.pack),
         ],
         if (_error != null) ...<Widget>[
           const SizedBox(height: 12),
