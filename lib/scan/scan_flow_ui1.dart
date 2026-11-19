@@ -34,7 +34,7 @@ extension _ScanPickUi on _ScanFlowScreenState {
         ),
         const SizedBox(height: 16),
         Text(
-          'Where are you tidying? (optional)',
+          'Where are you tidying?',
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 6),
