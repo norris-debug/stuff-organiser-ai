@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.7+27
+version: 0.8.8+28
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -41,3 +41,7 @@ flutter:
 # photo (per-image reads from the recognition lane) and its dialog tracks
 # the iOS Safari keyboard (top-aligned + shrunk input while typing); the
 # chat photo bubble shows every uploaded angle as a labelled strip.
+# v0.8.8+28: mascots with traced geometry render from Leaf's locked path
+# pack v1 through the shared traced renderer (single locked expression
+# per character; mood variants fast-follow); legacy code-painted mascots
+# moved unchanged to mascot_painters_legacy.dart.
