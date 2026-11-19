@@ -12,6 +12,7 @@ import 'package:speech_to_text/speech_to_text.dart' as speech;
 
 import '../theme/app_theme.dart';
 import '../widgets/mascot_widget.dart';
+import 'web_camera.dart';
 
 /// Scan feature (v0.6.1).
 ///
@@ -235,6 +236,25 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
   /// another photo until the cap is reached.
   Future<void> _captureCamera() async {
     if (_photos.length >= _maxPhotos) return;
+    if (kIsWeb) {
+      // The plugin camera path does not capture in browsers, so the web
+      // build uses an in-app camera sheet built on getUserMedia instead.
+      final XFile? file = await captureWithWebCamera(
+        context,
+        onFallback: _pickFromGallery,
+      );
+      if (file == null) return;
+      final Uint8List bytes = await file.readAsBytes();
+      if (!mounted) return;
+      setState(() {
+        _photos = <_PhotoItem>[
+          ..._photos,
+          _PhotoItem(bytes: bytes, mime: 'image/jpeg'),
+        ];
+        _error = null;
+      });
+      return;
+    }
     try {
       final XFile? file = await _picker.pickImage(
         source: ImageSource.camera,

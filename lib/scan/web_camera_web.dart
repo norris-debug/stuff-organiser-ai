@@ -1,0 +1,209 @@
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+/// Opens an in-app camera sheet on the web using the browser getUserMedia
+/// API. Returns the captured frame as an XFile, or null when the user
+/// cancels or the camera cannot be opened.
+Future<XFile?> captureWithWebCamera(
+  BuildContext context, {
+  VoidCallback? onFallback,
+}) {
+  return showModalBottomSheet<XFile?>(
+    context: context,
+    isScrollControlled: true,
+    builder: (BuildContext sheetContext) =>
+        _WebCameraSheet(onFallback: onFallback),
+  );
+}
+
+class _WebCameraSheet extends StatefulWidget {
+  const _WebCameraSheet({this.onFallback});
+
+  final VoidCallback? onFallback;
+
+  @override
+  State<_WebCameraSheet> createState() => _WebCameraSheetState();
+}
+
+class _WebCameraSheetState extends State<_WebCameraSheet> {
+  final String _viewId =
+      'web-camera-${DateTime.now().millisecondsSinceEpoch}';
+
+  html.MediaStream? _stream;
+  html.VideoElement? _video;
+  bool _starting = true;
+  String? _problem;
+
+  @override
+  void initState() {
+    super.initState();
+    _start();
+  }
+
+  @override
+  void dispose() {
+    final html.MediaStream? stream = _stream;
+    if (stream != null) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+    super.dispose();
+  }
+
+  Future<void> _start() async {
+    try {
+      final html.MediaDevices? devices = html.window.navigator.mediaDevices;
+      if (devices == null) {
+        if (!mounted) return;
+        setState(() {
+          _starting = false;
+          _problem =
+              'This browser does not offer camera access. Use upload instead.';
+        });
+        return;
+      }
+      final html.MediaStream stream = await devices.getUserMedia(
+        <String, dynamic>{
+          'audio': false,
+          'video': <String, dynamic>{'facingMode': 'environment'},
+        },
+      );
+      if (!mounted) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      final html.VideoElement video = html.VideoElement()
+        ..autoplay = true
+        ..muted = true
+        ..setAttribute('playsinline', 'true')
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..style.objectFit = 'cover'
+        ..srcObject = stream;
+      final html.DivElement container = html.DivElement()
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..append(video);
+      ui.platformViewRegistry.registerViewFactory(
+        _viewId,
+        (int viewId) => container,
+      );
+      setState(() {
+        _stream = stream;
+        _video = video;
+        _starting = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _starting = false;
+        _problem = 'Camera permission was refused or no camera is available '
+            'here. Allow camera access for this page, or use upload instead.';
+      });
+    }
+  }
+
+  Future<void> _grab() async {
+    final html.VideoElement? video = _video;
+    if (video == null || video.videoWidth == 0 || video.videoHeight == 0) {
+      return;
+    }
+    try {
+      final html.CanvasElement canvas = html.CanvasElement(
+        width: video.videoWidth,
+        height: video.videoHeight,
+      );
+      canvas.context2d.drawImage(video, 0, 0);
+      final String dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      final int splitAt = dataUrl.indexOf(',');
+      if (splitAt < 0) throw StateError('bad data url');
+      final Uint8List bytes = base64Decode(dataUrl.substring(splitAt + 1));
+      final XFile file = XFile.fromData(
+        bytes,
+        name: 'web-capture.jpg',
+        mimeType: 'image/jpeg',
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop(file);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _problem = 'Could not save that capture. Try again, or use upload '
+            'instead.';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              'Take a photo',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'The browser camera opens here. Frame the space, then tap '
+              'Capture to add it to your scan.',
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                height: 320,
+                child: _starting
+                    ? const Center(child: CircularProgressIndicator())
+                    : _problem != null
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Text(
+                                _problem!,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ),
+                          )
+                        : HtmlElementView(viewType: _viewId),
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (_problem == null)
+              FilledButton.icon(
+                onPressed: _grab,
+                icon: const Icon(Icons.photo_camera_outlined),
+                label: const Text('Capture'),
+              )
+            else if (widget.onFallback != null)
+              FilledButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.onFallback!();
+                },
+                icon: const Icon(Icons.photo_library_outlined),
+                label: const Text('Use upload instead'),
+              ),
+            const SizedBox(height: 4),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
