@@ -104,20 +104,24 @@ extension _ScanRecognitionFlow on _ScanFlowScreenState {
               ),
             ],
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(null),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Skip this angle'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Coach from this'),
-            ),
-          ],
+          // v0.8.9: the action buttons hide while the keyboard is up so
+          // the input box keeps its height instead of compressing away.
+          actions: inset > 0
+              ? const <Widget>[]
+              : <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(null),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                    child: const Text('Skip this angle'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                    child: const Text('Coach from this'),
+                  ),
+                ],
         ),
       ),
     );

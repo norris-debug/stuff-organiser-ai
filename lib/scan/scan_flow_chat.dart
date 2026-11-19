@@ -24,7 +24,12 @@ extension _ScanChatFlow on _ScanFlowScreenState {
       );
     }
     for (final String observation in plan.observations) {
-      lines.add(_ChatLine(text: observation));
+      // v0.8.9: verify- and flagged-tier reads are the coach's
+      // confirmation points - the user can answer them inline.
+      final bool isConfirmation =
+          observation.startsWith('I think I can also see') ||
+              observation.startsWith('A few reads were too unsure');
+      lines.add(_ChatLine(text: observation, isConfirmation: isConfirmation));
     }
     for (int i = 0; i < plan.suggestions.length; i++) {
       final _Suggestion suggestion = plan.suggestions[i];
