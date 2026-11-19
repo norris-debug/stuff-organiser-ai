@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.8+28
+version: 0.8.9+29
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -45,3 +45,10 @@ flutter:
 # pack v1 through the shared traced renderer (single locked expression
 # per character; mood variants fast-follow); legacy code-painted mascots
 # moved unchanged to mascot_painters_legacy.dart.
+# v0.8.9+29: coach confirmation replies - the chat shows a reply bar at
+# the verify/flagged confirmation points and the answer lands inline;
+# result-page buttons equalized (both FilledButton.icon); the recognized-
+# object paste dialog hides its buttons while the keyboard is up so the
+# input box keeps its height; the anime three (twin tails, glasses boy,
+# bob cut) replace the ninja/idol/mage alternates with Leaf's traced art
+# (saved selections migrate to the pack default automatically).
