@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.6+26
+version: 0.8.7+27
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -37,3 +37,7 @@ flutter:
 # browser camera session is reused between shots (a fresh getUserMedia
 # right after a stop can serve a dead frame) and is fully released when
 # the scan flow closes.
+# v0.8.7+27: the recognized-object paste intake runs once per uploaded
+# photo (per-image reads from the recognition lane) and its dialog tracks
+# the iOS Safari keyboard (top-aligned + shrunk input while typing); the
+# chat photo bubble shows every uploaded angle as a labelled strip.
