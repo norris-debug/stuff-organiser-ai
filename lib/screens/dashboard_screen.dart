@@ -1,0 +1,396 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/space.dart';
+import '../services/plan_engine.dart';
+import '../state/app_state.dart';
+import '../widgets/mascot_widget.dart';
+import 'plan_screen.dart';
+import 'quick_add_screen.dart';
+import 'settings_screen.dart';
+import 'space_detail_screen.dart';
+
+/// Bottom-navigation shell shared by the three main tabs.
+class HomeShell extends StatefulWidget {
+  const HomeShell({super.key});
+
+  @override
+  State<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends State<HomeShell> {
+  int _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _index,
+        children: <Widget>[
+          DashboardScreen(onOpenPlan: () => setState(() => _index = 1)),
+          const PlanScreen(),
+          const SettingsScreen(),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const QuickAddScreen()),
+        ),
+        icon: const Icon(Icons.add),
+        label: const Text('Quick add'),
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (int index) => setState(() => _index = index),
+        destinations: const <NavigationDestination>[
+          NavigationDestination(icon: Icon(Icons.space_dashboard_outlined), selectedIcon: Icon(Icons.space_dashboard), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.checklist_outlined), selectedIcon: Icon(Icons.checklist), label: 'Plan'),
+          NavigationDestination(icon: Icon(Icons.tune_outlined), selectedIcon: Icon(Icons.tune), label: 'Settings'),
+        ],
+      ),
+    );
+  }
+}
+
+/// Screen 2: spaces overview, mascot greeting and today's plan card.
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key, this.onOpenPlan});
+
+  final VoidCallback? onOpenPlan;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppState state = context.watch<AppState>();
+    final ThemeData theme = Theme.of(context);
+    final TidyPlan plan = state.currentPlan;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text('Stuff Organiser AI'),
+            Text(
+              state.user?.displayLabel ?? 'Guest',
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ),
+        actions: <Widget>[
+          if (state.demoMode)
+            const Padding(
+              padding: EdgeInsets.only(right: 12),
+              child: Chip(label: Text('Demo mode')),
+            ),
+        ],
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
+          children: <Widget>[
+            _GreetingCard(state: state),
+            const SizedBox(height: 16),
+            _PlanCard(plan: plan, onStart: onOpenPlan),
+            const SizedBox(height: 20),
+            Row(
+              children: <Widget>[
+                Text('Your spaces', style: theme.textTheme.titleMedium),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () => showAddSpaceDialog(context),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add space'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (state.spaces.isEmpty)
+              const _EmptySpaces()
+            else
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.05,
+                children: state.spaces
+                    .map((Space space) => _SpaceCard(space: space, state: state))
+                    .toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GreetingCard extends StatelessWidget {
+  const _GreetingCard({required this.state});
+
+  final AppState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final int loose = state.looseCount;
+    final String greeting = loose == 0
+        ? 'All clear! Add something whenever it shows up.'
+        : '$loose thing${loose == 1 ? '' : 's'} still loose. One sprint and you are done.';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: <Widget>[
+            MascotWidget(
+              variant: state.mascot,
+              pack: state.themePack,
+              size: 96,
+              mood: loose == 0 ? MascotMood.cheer : MascotMood.happy,
+              celebrationTick: state.celebrationTick,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(_greetingWord(), style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 6),
+                  Text(greeting, style: theme.textTheme.bodyMedium),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _greetingWord() {
+    final int hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning!';
+    if (hour < 18) return 'Good afternoon!';
+    return 'Good evening!';
+  }
+}
+
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({required this.plan, this.onStart});
+
+  final TidyPlan plan;
+  final VoidCallback? onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    if (plan.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.celebration_outlined, color: theme.colorScheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Nothing loose right now. Enjoy the calm, or log something new.',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Text("Today's plan", style: theme.textTheme.titleMedium),
+                const Spacer(),
+                Text(
+                  '${plan.totalItems} items · about ${plan.totalMinutes} min',
+                  style: theme.textTheme.labelMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            for (final PlanSprint sprint in plan.sprints)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: <Widget>[
+                    Text(sprint.spaceEmoji, style: const TextStyle(fontSize: 18)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${sprint.spaceName} · ${sprint.steps.length} item${sprint.steps.length == 1 ? '' : 's'}',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    Text(sprint.estimateLabel, style: theme.textTheme.labelSmall),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: onStart,
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Start 10-minute sprint'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SpaceCard extends StatelessWidget {
+  const _SpaceCard({required this.space, required this.state});
+
+  final Space space;
+  final AppState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final int loose = state.looseInSpace(space.id);
+    final int total = state.countInSpace(space.id);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => SpaceDetailScreen(spaceId: space.id)),
+      ),
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+          color: theme.colorScheme.surface,
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(space.emoji, style: const TextStyle(fontSize: 30)),
+            const Spacer(),
+            Text(space.name, style: theme.textTheme.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 4),
+            Text(
+              loose == 0 ? '$total item${total == 1 ? '' : 's'} · tidy' : '$loose loose of $total',
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptySpaces extends StatelessWidget {
+  const _EmptySpaces();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('No spaces yet', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 6),
+            Text('Add your first space to start a plan.', style: theme.textTheme.bodyMedium),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () => showAddSpaceDialog(context),
+              child: const Text('Add space'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shared "add space" dialog (dashboard + settings).
+Future<void> showAddSpaceDialog(BuildContext context) async {
+  final TextEditingController nameController = TextEditingController();
+  final AppState state = context.read<AppState>();
+  String emoji = '📦';
+  const List<String> emojis = <String>['📦', '🍳', '🗂️', '👕', '🛏️', '🛁', '🎸', '📚'];
+
+  final bool? added = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext dialogContext) => StatefulBuilder(
+      builder: (BuildContext context, StateSetter setDialogState) {
+        return AlertDialog(
+          title: const Text('New space'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(
+                  labelText: 'Space name',
+                  hintText: 'Kitchen, desk, wardrobe...',
+                ),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: emojis.map((String value) {
+                  final bool selected = value == emoji;
+                  return InkWell(
+                    onTap: () => setDialogState(() => emoji = value),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: selected
+                            ? Theme.of(context).colorScheme.primaryContainer
+                            : null,
+                      ),
+                      child: Text(value, style: const TextStyle(fontSize: 20)),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+
+  if (added == true && nameController.text.trim().isNotEmpty) {
+    await state.addSpace(nameController.text.trim(), emoji: emoji);
+  }
+  nameController.dispose();
+}
