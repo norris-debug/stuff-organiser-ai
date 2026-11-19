@@ -15,7 +15,7 @@ extension _ScanCapture on _ScanFlowScreenState {
       if (file == null) return;
       final Uint8List bytes = await file.readAsBytes();
       if (!mounted) return;
-      setState(() {
+      _setUiState(() {
         _photos = <_PhotoItem>[
           ..._photos,
           _PhotoItem(bytes: bytes, mime: 'image/jpeg'),
@@ -33,7 +33,7 @@ extension _ScanCapture on _ScanFlowScreenState {
       if (file == null) return;
       final Uint8List bytes = await file.readAsBytes();
       if (!mounted) return;
-      setState(() {
+      _setUiState(() {
         _photos = <_PhotoItem>[
           ..._photos,
           _PhotoItem(bytes: bytes, mime: _mimeFor(file.path)),
@@ -42,7 +42,7 @@ extension _ScanCapture on _ScanFlowScreenState {
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() {
+      _setUiState(() {
         _error = 'Could not open the camera or the gallery. Please try again.';
       });
     }
@@ -74,13 +74,13 @@ extension _ScanCapture on _ScanFlowScreenState {
       }
       if (picked.isEmpty) return;
       if (!mounted) return;
-      setState(() {
+      _setUiState(() {
         _photos = <_PhotoItem>[..._photos, ...picked];
         _error = null;
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() {
+      _setUiState(() {
         _error = 'Could not open the camera or the gallery. Please try again.';
       });
     }
@@ -88,7 +88,7 @@ extension _ScanCapture on _ScanFlowScreenState {
 
   void _removePhoto(int index) {
     if (index < 0 || index >= _photos.length) return;
-    setState(() {
+    _setUiState(() {
       final List<_PhotoItem> remaining = <_PhotoItem>[..._photos];
       remaining.removeAt(index);
       _photos = remaining;

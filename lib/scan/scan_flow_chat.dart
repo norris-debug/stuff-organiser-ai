@@ -50,7 +50,7 @@ extension _ScanChatFlow on _ScanFlowScreenState {
             'another photo afterwards and we will check how the space looks.',
       ),
     );
-    setState(() {
+    _setUiState(() {
       _lines = lines;
       _revealed = 1;
       _stage = _ScanStage.chat;
@@ -84,14 +84,14 @@ extension _ScanChatFlow on _ScanFlowScreenState {
       return;
     }
     _lastNextAt = now;
-    setState(() {
+    _setUiState(() {
       if (_revealed < _lines.length) _revealed++;
     });
     _scrollToBottom();
   }
 
   void _openResult() {
-    setState(() {
+    _setUiState(() {
       _stage = _ScanStage.result;
     });
   }
@@ -165,7 +165,7 @@ extension _ScanChatFlow on _ScanFlowScreenState {
   void _resetFlow() {
     _runId++;
     unawaited(_stopListening());
-    setState(() {
+    _setUiState(() {
       _photos = <_PhotoItem>[];
       _notesController.clear();
       _listening = false;
