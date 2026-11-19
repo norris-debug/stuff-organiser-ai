@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -24,15 +25,15 @@ part 'scan_flow_ui2.dart';
 part 'scan_flow_ui3.dart';
 part 'scan_flow_thinking.dart';
 
-/// Scan feature (v0.6.9).
+/// Scan feature (v0.7.0).
 ///
 /// The coach looks at the photos that were actually taken and proposes a
 /// number of concrete physical actions that scales with the messiness.
-/// v0.6.9 routes interpretation and layout to the Cellulose lane: the
-/// in-app Gemini key flow is fully removed and the thinking state covers
-/// the wait while results come back. The Next control is rate limited so
-/// rapid tapping cannot outrun the coach, and title texts use a larger
-/// display font.
+/// v0.7 adds the venue chooser: the picked room rides with the request so
+/// the Cellulose lane reads the space with context, and it names the part
+/// that is auto-saved into the Tidy Plan tab. Interpretation stays on the
+/// Cellulose lane (v0.6.9), the Next control remains rate limited, and the
+/// result stage now carries the thinking state.
 class ScanFlowScreen extends StatefulWidget {
   const ScanFlowScreen({
     super.key,
@@ -84,13 +85,15 @@ class _ScanPlan {
     required this.observations,
     required this.habits,
     this.suggestions = const <_Suggestion>[],
+    this.setting = '',
+    this.tidiness = '',
   });
 
-  /// Comma separated list of the surfaces and areas visible in the photo.
-  final String setting = '';
+  /// The venue picked for this scan round (empty when the user skipped it).
+  final String setting;
 
   /// tidy | moderate | messy (empty when it could not be detected).
-  final String tidiness = '';
+  final String tidiness;
 
   final List<String> observations;
   final List<_Suggestion> suggestions;
@@ -98,6 +101,19 @@ class _ScanPlan {
 
   bool get hasSetting => setting.trim().isNotEmpty;
   bool get hasTidiness => tidiness.trim().isNotEmpty;
+
+  /// Returns this plan with the picked venue folded into the setting, so
+  /// the venue rides through the chat intro, the chips and the digest.
+  _ScanPlan withVenue(String venue) {
+    if (venue.trim().isEmpty) return this;
+    return _ScanPlan(
+      setting: venue.trim(),
+      tidiness: tidiness,
+      observations: observations,
+      habits: habits,
+      suggestions: suggestions,
+    );
+  }
 }
 
 /// Offline play book used by the demo coach.
@@ -137,6 +153,7 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
   final ImagePicker _picker = ImagePicker();
   final ScrollController _chatScroll = ScrollController();
   final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _venueController = TextEditingController();
   speech.SpeechToText? _speech;
   String _dictationBase = '';
   bool _speechAvailable = false;
@@ -154,10 +171,6 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     habits: <String>[],
   );
 
-  Uint8List? _afterBytes;
-  String? _afterUrl;
-  bool _afterLoading = false;
-
   /// Timestamp of the last accepted Next press (rate limiting).
   DateTime _lastNextAt = DateTime.fromMillisecondsSinceEpoch(0);
 
@@ -165,6 +178,7 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
   void dispose() {
     _chatScroll.dispose();
     _notesController.dispose();
+    _venueController.dispose();
     _speech?.stop();
     super.dispose();
   }
@@ -176,6 +190,9 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     setState(fn);
   }
 
+  /// The picked venue for this scan round (empty when the user skipped it).
+  String get _scanVenue => _venueController.text.trim();
+
   String get _stageTitle => switch (_stage) {
         _ScanStage.pick => 'Scan your space',
         _ScanStage.chat => 'Coach chat',
@@ -185,12 +202,111 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_stageTitle)),
+      appBar: AppBar(
+        title: Text(_stageTitle),
+        leading: _stage == _ScanStage.result
+            ? BackButton(onPressed: _discardAndHome)
+            : null,
+        actions: _stage == _ScanStage.result
+            ? <Widget>[
+                IconButton(
+                  tooltip: 'Copy plan text',
+                  icon: const Icon(Icons.copy_all_outlined),
+                  onPressed: _copyPlan,
+                ),
+              ]
+            : null,
+      ),
       body: switch (_stage) {
         _ScanStage.pick => _buildPick(context),
         _ScanStage.chat => _buildChat(context),
         _ScanStage.result => _buildResult(context),
       },
     );
+  }
+
+  /// v0.7: the result-stage back arrow discards the suggestions without
+  /// saving and returns to the home shell.
+  void _discardAndHome() {
+    Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+  }
+
+  /// v0.7: 'Return to homepage' saves the suggestions into the Tidy Plan
+  /// tab first, then pops back to the home shell.
+  Future<void> _saveThenHome() async {
+    await _savePlanToTidyList();
+    if (!mounted) return;
+    _discardAndHome();
+  }
+
+  /// v0.7: 'Scan another room' saves first, then starts a fresh round.
+  Future<void> _saveThenNewRound() async {
+    final bool saved = await _savePlanToTidyList();
+    if (!mounted) return;
+    _resetFlow();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          saved
+              ? 'Saved to the Tidy Plan tab'
+              : 'Nothing to save - new round started',
+        ),
+      ),
+    );
+  }
+
+  /// v0.7: appends the coach's suggestions to the Tidy Plan tab as a new
+  /// part named for the picked venue. The storage key must stay in sync
+  /// with PlanScreen._dataKey (tidy_plan_todo_v1).
+  static const String _tidyPlanStorageKey = 'tidy_plan_todo_v1';
+  static int _scanIdCounter = 0;
+
+  String _newScanId() {
+    _scanIdCounter++;
+    return 't${DateTime.now().microsecondsSinceEpoch}-$_scanIdCounter';
+  }
+
+  Future<bool> _savePlanToTidyList() async {
+    if (_plan.suggestions.isEmpty) return false;
+    final SharedPreferences prefs = widget.prefs;
+    final String raw = prefs.getString(_tidyPlanStorageKey) ?? '';
+    List<dynamic> parts;
+    try {
+      final dynamic decoded = jsonDecode(raw);
+      if (decoded is List<dynamic>) {
+        parts = decoded;
+      } else {
+        parts = <dynamic>[];
+      }
+    } catch (_) {
+      // Corrupt store: never overwrite existing data with a partial save.
+      return false;
+    }
+    final String venue = _scanVenue;
+    final String partName = venue.isNotEmpty ? venue : 'Scanned space';
+    final List<Map<String, dynamic>> tasks = <Map<String, dynamic>>[];
+    for (final _Suggestion suggestion in _plan.suggestions) {
+      final String steps = suggestion.steps.join(' -> ');
+      String detail = suggestion.detail;
+      if (steps.isNotEmpty) {
+        detail = detail.isEmpty
+            ? 'How to do it: $steps'
+            : '$detail How to do it: $steps';
+      }
+      tasks.add(<String, dynamic>{
+        'id': _newScanId(),
+        'text': suggestion.title,
+        'details': detail,
+        'done': false,
+      });
+    }
+    parts.add(<String, dynamic>{
+      'id': _newScanId(),
+      'name': partName,
+      'tasks': tasks,
+    });
+    await prefs.setString(_tidyPlanStorageKey, jsonEncode(parts));
+    return true;
   }
 }
