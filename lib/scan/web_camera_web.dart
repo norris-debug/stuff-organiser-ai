@@ -35,8 +35,7 @@ class _WebCameraSheet extends StatefulWidget {
 
 class _WebCameraSheetState extends State<_WebCameraSheet> {
   int _viewSeq = 0;
-  String get _viewId =>
-      'web-camera-${DateTime.now().millisecondsSinceEpoch}-$_viewSeq';
+  String? _activeViewId;
 
   html.MediaStream? _stream;
   html.VideoElement? _video;
@@ -76,11 +75,23 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
           'audio': false,
           'video': <String, dynamic>{'facingMode': _front ? 'user' : 'environment'},
         },
-      );
+      ).timeout(const Duration(seconds: 8));
       if (!mounted) {
         stream.getTracks().forEach((track) => track.stop());
         return;
       }
+      if (stream.getVideoTracks().isEmpty) {
+        stream.getTracks().forEach((track) => track.stop());
+        if (!mounted) return;
+        setState(() {
+          _starting = false;
+          _problem = 'No video feed came back from the camera. Use upload '
+              'instead.';
+        });
+        return;
+      }
+      final String viewId =
+          'web-camera-${DateTime.now().millisecondsSinceEpoch}-$_viewSeq';
       final html.VideoElement video = html.VideoElement()
         ..autoplay = true
         ..muted = true
@@ -95,20 +106,21 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
         ..append(video);
       // ignore: undefined_prefixed_name
       ui.platformViewRegistry.registerViewFactory(
-        _viewId,
+        viewId,
         (int viewId) => container,
       );
       setState(() {
         _stream = stream;
         _video = video;
+        _activeViewId = viewId;
         _starting = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _starting = false;
-        _problem = 'Camera permission was refused or no camera is available '
-            'here. Allow camera access for this page, or use upload instead.';
+        _problem = 'Camera could not start here (refused, busy or too '
+            'slow). Allow camera access for this page, or use upload '
+            'instead.';
       });
     }
   }
@@ -122,6 +134,7 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
     setState(() {
       _stream = null;
       _video = null;
+      _activeViewId = null;
       _viewSeq++;
       _front = !_front;
       _starting = true;
@@ -203,7 +216,9 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
                               ),
                             ),
                           )
-                        : HtmlElementView(viewType: _viewId),
+                        : _activeViewId == null
+                              ? const SizedBox.shrink()
+                              : HtmlElementView(viewType: _activeViewId!),
               ),
             ),
             const SizedBox(height: 12),
