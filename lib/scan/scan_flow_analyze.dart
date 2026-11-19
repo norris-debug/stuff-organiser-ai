@@ -10,7 +10,8 @@ extension _ScanAnalyze on _ScanFlowScreenState {
   /// offline coach with the picked venue folded in, and the thinking state
   /// on the result page covers the wait for the lane wiring. v0.8: the
   /// render loader covers this wait and holds at least ~1.5s so it never
-  /// flashes.
+  /// flashes. v0.8.2: the per-angle render slots reset here so a new round
+  /// never carries a previous round's renders.
   Future<void> _analyze() async {
     if (_photos.isEmpty) return;
     final int runId = ++_runId;
@@ -21,6 +22,7 @@ extension _ScanAnalyze on _ScanFlowScreenState {
       _error = null;
       _lines = <_ChatLine>[];
       _revealed = 0;
+      _angleRenders.clear();
     });
 
     await Future<void>.delayed(const Duration(milliseconds: 1500));
