@@ -69,6 +69,12 @@ jobs:
       - name: Publish APK alongside the web app
         run: cp apk/app-debug.apk build/web/stuff-organiser-ai-debug.apk
 
+      - name: Stamp version for outside verification
+        run: |
+          VERSION=$(grep -E '^version:' pubspec.yaml | head -n 1 | sed -E 's/^version:[[:space:]]*//')
+          printf '{"version":"%s"}\n' "$VERSION" > build/web/version.json
+          cat build/web/version.json
+
       - uses: actions/configure-pages@v5
         with:
           enablement: true

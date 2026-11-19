@@ -38,6 +38,37 @@ flutter build apk --debug    # installable debug APK
 1. Push this repo to GitHub.
 2. Actions → android-apk → latest run → Artifacts → `stuff-organiser-ai-debug-apk`.
 
+The web-pages job also publishes the web build (plus the APK as a direct
+download) to GitHub Pages and stamps `build/web/version.json` with the pubspec
+version so the deployed build can be verified from outside.
+
+## Scan feature (v0.5)
+
+Photograph a messy space and the tidy coach analyses the actual photo:
+
+- Suggestions are concrete physical actions naming the real objects in shot
+  (sort the paper piles, stack the cups by size, corral the cables), in the
+  style of professional small-space organising: sort into keep / relocate /
+  donate-bin piles, group like with like, contain and label, use vertical
+  space, clear floor and surfaces.
+- The coach reports the visible **setting** (table / floor / shelf / bed /
+  desk / kitchen counter ...) and a **mess level** (tidy / moderate / messy).
+- The number of suggestions scales with the real mess: 1-2 for a tidy space,
+  4-6 for moderate, 8-12 for very messy — never a fixed count.
+- An **after-tidying picture** is generated: with a Gemini key it is a
+  photoreal edit of your own photo; without a key it falls back to a keyless
+  concept image and, if that is unavailable, to the in-app concept placeholder.
+
+Optional Gemini API key: open Scan → key icon in the top bar → paste → Save.
+The key stays on the device (shared_preferences) and is used only for photo
+analysis and after-shot generation.
+
+| Purpose | Models tried in order |
+| --- | --- |
+| Photo analysis | `gemini-2.5-flash`, `gemini-2.0-flash` |
+| After-shot image | `gemini-2.5-flash-image`, `gemini-2.5-flash-image-preview`, `gemini-2.0-flash-exp` |
+| Keyless fallback | Pollinations image URL seeded with a hash of the photo |
+
 ## Firebase (optional, for real accounts)
 
 - Keys at build time:
@@ -79,3 +110,34 @@ status `loose | organized`. Paper piles carry an action: `sort | keep | file | r
 - Order fix: new items take max(order)+1 inside a space, closing an order
   collision after a cross-space move.
 - pubspec bumped to 0.3.0+3. No new dependencies; all v0.2 fixes retained.
+
+## Changelog v0.3 → v0.4
+
+- New **Scan** feature: a camera "Scan" button on the home screen; the coach
+  chats the plan step by step in separate dialogue boxes, then a concept
+  preview plus the complete notes page with copy-all.
+- Demo mode by default; optional Google AI Studio / Gemini key via the key
+  icon inside the scan screen, kept on-device, with graceful fallback to demo
+  whenever the live call fails.
+- CI builds the web version and publishes it to GitHub Pages together with a
+  direct-download APK.
+- pubspec bumped to 0.4.0+4. No new dependencies; all v0.3 fixes retained.
+
+## Changelog v0.4 → v0.5
+
+- Scan now analyses what is actually in the photo: every suggestion names the
+  real objects and surfaces it can see and proposes a concrete physical action
+  instead of template advice (reference: professional organiser Kira Chan's
+  small-space tidying method).
+- The coach reports the visible setting and the mess level, both surfaced as
+  chips in the result stage and included in the copy digest.
+- The number of suggestions scales with the real messiness (1-2 for tidy,
+  4-6 for moderate, 8-12 for messy) instead of a fixed list.
+- New generated "after tidying" picture: photoreal edit of the user's own
+  photo with a Gemini key; keyless Pollinations concept image otherwise, with
+  graceful degradation to the concept placeholder.
+- Richer offline demo coach: the photo hash selects one of three concrete
+  organiser play books (papers and files, cups and dishes, clothes / floor /
+  cables) and the suggestion count varies per photo.
+- pubspec bumped to 0.5.0+5. CI stamps `build/web/version.json` with the
+  pubspec version for outside verification.
