@@ -363,10 +363,9 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
   }
 
   _ScanPlan _parsePlan(Map<String, Object?> json) {
-    final String setting =
-        (json['setting'] as Object?)?.toString().trim() ?? '';
+    final String setting = json['setting']?.toString().trim() ?? '';
     final String tidiness = _normalizeTidiness(
-      (json['tidiness'] as Object?)?.toString() ?? '',
+      json['tidiness']?.toString() ?? '',
     );
     final List<String> observations = _stringList(json['observations']);
     final List<String> habits = _stringList(json['habits']);
@@ -377,10 +376,8 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
       for (final Object? item in rawSuggestions) {
         if (item is! Map) continue;
         final Map<String, Object?> map = Map<String, Object?>.from(item);
-        final String title =
-            (map['title'] as Object?)?.toString().trim() ?? '';
-        final String detail =
-            (map['detail'] as Object?)?.toString().trim() ?? '';
+        final String title = map['title']?.toString().trim() ?? '';
+        final String detail = map['detail']?.toString().trim() ?? '';
         final List<String> steps = _stringList(map['steps']);
         if (title.isEmpty && detail.isEmpty && steps.isEmpty) continue;
         suggestions.add(
