@@ -73,8 +73,17 @@ class SettingsScreen extends StatelessWidget {
             title: 'Mascot',
             subtitle: 'Pick the buddy for the ${state.themePack.label} pack.',
             child: Column(
-              children: state.themePack.mascots.map((MascotVariant variant) {
+              children: state.themePack.mascots
+                  .toList()
+                  .asMap()
+                  .entries
+                  .map((MapEntry<int, MascotVariant> entry) {
+                final MascotVariant variant = entry.value;
                 final bool selected = variant == state.mascot;
+                // v0.8.3: expression variety - each row shows a different
+                // mood instead of one shared smile.
+                final MascotMood mood =
+                    MascotMood.values[entry.key % MascotMood.values.length];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: InkWell(
@@ -98,7 +107,7 @@ class SettingsScreen extends StatelessWidget {
                             variant: variant,
                             pack: state.themePack,
                             size: 56,
-                            mood: MascotMood.happy,
+                            mood: mood,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
