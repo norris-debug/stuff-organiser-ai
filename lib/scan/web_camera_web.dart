@@ -34,13 +34,15 @@ class _WebCameraSheet extends StatefulWidget {
 }
 
 class _WebCameraSheetState extends State<_WebCameraSheet> {
-  final String _viewId =
-      'web-camera-${DateTime.now().millisecondsSinceEpoch}';
+  int _viewSeq = 0;
+  String get _viewId =>
+      'web-camera-${DateTime.now().millisecondsSinceEpoch}-$_viewSeq';
 
   html.MediaStream? _stream;
   html.VideoElement? _video;
   bool _starting = true;
   String? _problem;
+  bool _front = false;
 
   @override
   void initState() {
@@ -72,7 +74,7 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
       final html.MediaStream stream = await devices.getUserMedia(
         <String, dynamic>{
           'audio': false,
-          'video': <String, dynamic>{'facingMode': 'environment'},
+          'video': <String, dynamic>{'facingMode': _front ? 'user' : 'environment'},
         },
       );
       if (!mounted) {
@@ -109,6 +111,23 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
             'here. Allow camera access for this page, or use upload instead.';
       });
     }
+  }
+
+  /// Stops the current stream and reopens the camera facing the other way.
+  Future<void> _flip() async {
+    final html.MediaStream? stream = _stream;
+    if (stream != null) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+    setState(() {
+      _stream = null;
+      _video = null;
+      _viewSeq++;
+      _front = !_front;
+      _starting = true;
+      _problem = null;
+    });
+    await _start();
   }
 
   Future<void> _grab() async {
@@ -189,10 +208,22 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
             ),
             const SizedBox(height: 12),
             if (_problem == null)
-              FilledButton.icon(
-                onPressed: _grab,
-                icon: const Icon(Icons.photo_camera_outlined),
-                label: const Text('Capture'),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _grab,
+                      icon: const Icon(Icons.photo_camera_outlined),
+                      label: const Text('Capture'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: _starting ? null : _flip,
+                    icon: const Icon(Icons.cameraswitch_outlined),
+                    label: Text(_front ? 'Front' : 'Rear'),
+                  ),
+                ],
               )
             else if (widget.onFallback != null)
               FilledButton.icon(
