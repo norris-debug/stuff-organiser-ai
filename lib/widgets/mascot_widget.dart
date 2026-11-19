@@ -9,7 +9,7 @@ import 'mascot_painters_3.dart';
 import 'mascot_painters_4.dart';
 import 'mascot_painters_5.dart';
 
-enum MascotMood { idle, happy, cheer }
+enum MascotMood { idle, happy, cheer, blink, surprised }
 
 /// Placeholder mascot: painted shapes only (v1 constraint - no image assets).
 /// It bobs while idle and bursts into confetti when `celebrationTick` changes,
