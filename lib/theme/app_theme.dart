@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Mascot variants. v1 uses painted placeholder art only (no image assets).
 enum MascotVariant { bunny, cat, robot, axolotl, ramen, berry, note, speaker, redPanda, quokka, seaOtter, cake, salad, pizza, blindfolded, strawHat, ninja, idol, mage }
@@ -96,9 +97,18 @@ ThemePack themePackById(String id) =>
 
 ThemeData buildAppTheme(ThemePack pack) {
   final ColorScheme scheme = ColorScheme.fromSeed(seedColor: pack.seed);
+  final TextTheme base = ThemeData.light().textTheme;
+  final TextTheme textTheme = base.copyWith(
+    headlineMedium: GoogleFonts.baloo2(fontSize: 30, fontWeight: FontWeight.w700),
+    headlineSmall: GoogleFonts.baloo2(fontSize: 32, fontWeight: FontWeight.w700),
+    titleLarge: GoogleFonts.baloo2(fontSize: 26, fontWeight: FontWeight.w700),
+    titleMedium: GoogleFonts.baloo2(fontSize: 19, fontWeight: FontWeight.w700),
+    titleSmall: GoogleFonts.baloo2(fontSize: 16, fontWeight: FontWeight.w700),
+  );
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
+    textTheme: textTheme,
     appBarTheme: AppBarTheme(
       backgroundColor: scheme.surface,
       foregroundColor: scheme.onSurface,
