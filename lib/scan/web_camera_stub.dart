@@ -9,3 +9,6 @@ Future<XFile?> captureWithWebCamera(
 }) async {
   return null;
 }
+
+/// Non-web no-op: there is no shared web camera session to release.
+void releaseWebCamera() {}
