@@ -1,0 +1,5 @@
+# Analyzer settings for Stuff Organiser AI.
+# Intentionally minimal for the MVP: keeps CI deterministic while the codebase
+# is young. A shared lint set (e.g. flutter_lints) can be adopted in a later
+# release once the codebase stabilizes; enabling it now would flood CI with
+# style-level findings unrelated to v0.3 correctness.
