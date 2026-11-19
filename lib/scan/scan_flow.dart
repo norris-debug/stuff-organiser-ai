@@ -287,7 +287,7 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
     if (!_speechAvailable) {
       try {
         _speechAvailable = await engine.initialize(
-          onError: (speech.SpeechRecognitionError error) {},
+          onError: (Object error) {},
           onStatus: _onSpeechStatus,
         );
       } catch (_) {
@@ -308,7 +308,7 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
     _dictationBase = _notesController.text.trim();
     try {
       await engine.listen(
-        onResult: _onSpeechResult,
+        onResult: (result) => _onSpeechResult(result.recognizedWords),
         listenOptions: speech.SpeechListenOptions(
           cancelOnError: true,
           partialResults: true,
@@ -349,8 +349,8 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
     }
   }
 
-  void _onSpeechResult(speech.SpeechRecognitionResult result) {
-    final String recognized = result.recognizedWords.trim();
+  void _onSpeechResult(String recognizedWords) {
+    final String recognized = recognizedWords.trim();
     if (recognized.isEmpty) return;
     if (!mounted) return;
     setState(() {
