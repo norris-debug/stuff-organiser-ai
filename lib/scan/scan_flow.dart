@@ -154,7 +154,7 @@ Analyse what is ACTUALLY visible in those photos and nothing else.
 Rules:
 1. Look only at the objects, surfaces and areas that are really in the photos. Never reuse a template or generic advice such as declutter your space, organise your belongings, make a plan, or keep it clean.
 2. Every suggestion must be a concrete physical action that names the real things you can see and says what to do with them: group, stack, fold, contain, label, relocate, wipe, sort, coil or bin.
-3. Work like a professional small space organiser from Hong Kong. First declutter by sorting everything into three piles - keep, relocate, and donate or bin. Then group like with like. Then contain each group in a basket or box and label it. Then use vertical space and frequency based zoning, so daily items sit at hand height and occasional items sit higher up. Finish with a clear floor and clear flat surfaces.
+3. Work like a professional small space organiser from Hong Kong. First declutter by sorting everything into three piles - keep, relocate, and donate or bin. Then group like with like. Then contain each group in a basket or box and label it. Then use vertical space and frequency based zoning, so daily items sit at hand height and occasional items sit higher up. Only add a clear the floor or clear the surfaces step when the photos really show clutter on the floor or on those surfaces, and only add a fold the clothes step when the photos really show loose clothes. Never pad the plan with generic filler steps that would fit any room.
 4. If user notes are provided, treat them as real context about items the photos cannot show, for example socks underneath the visible clothes. Fold those items into the plan together with what is visible.
 5. Give a tidiness verdict that is exactly one of: tidy, moderate, messy.
 6. The number of suggestions must follow the real messiness and must never be a fixed number. tidy means 1 to 2 suggestions, moderate means 4 to 6 suggestions, messy means 8 to 12 suggestions.
@@ -878,6 +878,36 @@ $trimmed''';
       ...bank.suggestions.take(offset),
     ];
     final int count = 2 + (seed % 3);
+    // The demo coach cannot see the photos, so the two room-shape actions
+    // that used to repeat on every run (fold the clothes, clear the floor)
+    // now only join the plan when the user's own notes mention them.
+    final String lowerNotes = notes.toLowerCase();
+    final bool wantsClothes = <String>[
+      'clothes',
+      'clothing',
+      'shirt',
+      'pants',
+      'laundry',
+      'wardrobe',
+      'jacket',
+      'sock',
+    ].any(lowerNotes.contains);
+    final bool wantsFloor = <String>[
+      'floor',
+      'ground',
+      'walking lane',
+      'walkway',
+    ].any(lowerNotes.contains);
+    final List<_Suggestion> filtered = <_Suggestion>[
+      for (final _Suggestion suggestion in rotated)
+        if ((wantsClothes ||
+                suggestion.title !=
+                    'Fold the clothes and line them up in one stack') &&
+            (wantsFloor ||
+                suggestion.title !=
+                    'Clear the floor into one walking lane'))
+          suggestion,
+    ];
     final List<String> observations = List<String>.of(bank.observations);
     observations.insert(
       0,
@@ -893,7 +923,7 @@ $trimmed''';
     }
     return _ScanPlan(
       observations: observations,
-      suggestions: rotated.take(count).toList(),
+      suggestions: filtered.take(count).toList(),
       habits: bank.habits,
     );
   }
