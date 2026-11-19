@@ -8,6 +8,7 @@ import 'mascot_painters_2.dart';
 import 'mascot_painters_3.dart';
 import 'mascot_painters_4.dart';
 import 'mascot_painters_5.dart';
+import 'mascot_painters_legacy.dart';
 
 enum MascotMood { idle, happy, cheer, blink, surprised }
 
