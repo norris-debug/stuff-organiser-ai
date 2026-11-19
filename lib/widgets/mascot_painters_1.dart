@@ -4,28 +4,14 @@ import '../theme/app_theme.dart';
 import 'mascot_face.dart';
 import 'mascot_widget.dart';
 
-/// v0.8: bunny and cat painted from Leaf's approved animal specs -
-/// head-only busts on their coded pastel tiles, dot-eye base, flat fills,
-/// no outlines. Robot and axolotl keep their v1 placeholder shapes
+/// v0.8.3: bunny and cat painted from Leaf's approved animal specs -
+/// heads only on their coded pastel tiles: nothing below the neck and
+/// the whole mascot inside the tile. Dot-eye base, flat fills, no
+/// outlines. Robot and axolotl keep their v1 placeholder shapes
 /// (they are not selectable since v0.6.8).
 
 void _drawPastelTile(Canvas canvas, Size size, Color color) {
   canvas.drawRect(Offset.zero & size, Paint()..color = color);
-}
-
-/// Soft bust mass cropped by the bottom edge: head-only framing that
-/// still anchors the character inside the tile.
-void _bust(Canvas canvas, Size size, Color color) {
-  final double w = size.width;
-  final double h = size.height;
-  canvas.drawOval(
-    Rect.fromCenter(
-      center: Offset(w / 2, h * 0.98),
-      width: w * 0.94,
-      height: h * 0.44,
-    ),
-    Paint()..color = color,
-  );
 }
 
 void paintMascotBunny(Canvas canvas, Size size, ThemePack pack, MascotMood mood) {
@@ -33,8 +19,8 @@ void paintMascotBunny(Canvas canvas, Size size, ThemePack pack, MascotMood mood)
   final double h = size.height;
   final Paint body = Paint()..color = const Color(0xFFF6F1E7);
   final Paint inner = Paint()..color = const Color(0xFFF3C1CF);
-  final Offset head = Offset(w * 0.5, h * 0.52);
-  final double r = w * 0.31;
+  final Offset head = Offset(w * 0.5, h * 0.55);
+  final double r = w * 0.34;
   final bool happy = mood != MascotMood.idle;
 
   _drawPastelTile(canvas, size, const Color(0xFFFBE7EE));
@@ -73,7 +59,6 @@ void paintMascotBunny(Canvas canvas, Size size, ThemePack pack, MascotMood mood)
       innerStroke,
     );
   }
-  _bust(canvas, size, const Color(0xFFF6F1E7));
   canvas.drawCircle(head, r, body);
   canvas.drawOval(
     Rect.fromCenter(
@@ -91,8 +76,8 @@ void paintMascotCat(Canvas canvas, Size size, ThemePack pack, MascotMood mood) {
   final double h = size.height;
   final Paint body = Paint()..color = const Color(0xFFAEB8C2);
   final Paint cream = Paint()..color = const Color(0xFFF1E9DC);
-  final Offset head = Offset(w * 0.49, h * 0.5);
-  final double r = w * 0.33;
+  final Offset head = Offset(w * 0.49, h * 0.53);
+  final double r = w * 0.35;
 
   _drawPastelTile(canvas, size, const Color(0xFFF2EEE4));
   for (final double sign in <double>[-1, 1]) {
@@ -122,7 +107,6 @@ void paintMascotCat(Canvas canvas, Size size, ThemePack pack, MascotMood mood) {
       innerStroke,
     );
   }
-  _bust(canvas, size, const Color(0xFFAEB8C2));
   canvas.drawCircle(head, r, body);
   canvas.drawOval(
     Rect.fromCenter(
