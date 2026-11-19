@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.5+25
+version: 0.8.6+26
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -33,3 +33,7 @@ flutter:
 # v0.8.5+25: coach chat drafts from the recognition lane's object list
 # (paste intake on the interim route) instead of the canned demo script;
 # otter and cat whisker dots removed per the closed mascot ruling.
+# v0.8.6+26: web camera live preview survives every capture - the shared
+# browser camera session is reused between shots (a fresh getUserMedia
+# right after a stop can serve a dead frame) and is fully released when
+# the scan flow closes.
