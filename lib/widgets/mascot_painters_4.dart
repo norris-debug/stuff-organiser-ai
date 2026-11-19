@@ -4,9 +4,10 @@ import '../theme/app_theme.dart';
 import 'mascot_face.dart';
 import 'mascot_widget.dart';
 
-/// v0.8: cake, salad and pizza painted from Leaf's food finals - head-only
-/// busts on their coded pastel tiles, dot-eye base, flat fills, no outlines.
-/// The pastel tile is painted in code at render time.
+/// v0.8.3: cake, salad and pizza painted from Leaf's food finals -
+/// heads only on their coded pastel tiles, with the whole mascot inside
+/// the tile (nothing cropped at the edges). Dot-eye base, flat fills,
+/// no outlines. The pastel tile is painted in code at render time.
 
 void _drawPastelTile(Canvas canvas, Size size, Color color) {
   canvas.drawRect(Offset.zero & size, Paint()..color = color);
@@ -17,10 +18,10 @@ void paintMascotCake(Canvas canvas, Size size, ThemePack pack, MascotMood mood) 
   final double h = size.height;
 
   _drawPastelTile(canvas, size, const Color(0xFFFBEFDD));
-  // Top tier as the bust mass, cropped by the bottom edge.
+  // Top tier as the head mass, fully inside the tile.
   canvas.drawRRect(
     RRect.fromRectAndRadius(
-      Rect.fromLTWH(w * 0.14, h * 0.4, w * 0.72, h * 0.66),
+      Rect.fromLTWH(w * 0.14, h * 0.4, w * 0.72, h * 0.52),
       Radius.circular(w * 0.06),
     ),
     Paint()..color = const Color(0xFFFCEBD6),
@@ -70,9 +71,9 @@ void paintMascotSalad(Canvas canvas, Size size, ThemePack pack, MascotMood mood)
   canvas.drawCircle(Offset(w * 0.76, h * 0.4), w * 0.085, Paint()..color = const Color(0xFFFF6A56));
   canvas.drawCircle(Offset(w * 0.735, h * 0.38), w * 0.022, Paint()..color = const Color(0xFFFFD7C8));
   canvas.drawRect(Rect.fromLTWH(w * 0.745, h * 0.29, w * 0.03, h * 0.04), Paint()..color = const Color(0xFF4A9B58));
-  // Bowl head mass + rim, cropped at the bottom.
+  // Bowl head mass + rim, fully inside the tile.
   canvas.drawOval(
-    Rect.fromCenter(center: Offset(w * 0.5, h * 0.72), width: w * 0.84, height: h * 0.62),
+    Rect.fromCenter(center: Offset(w * 0.5, h * 0.68), width: w * 0.84, height: h * 0.5),
     Paint()..color = const Color(0xFFF7E6D1),
   );
   canvas.drawOval(

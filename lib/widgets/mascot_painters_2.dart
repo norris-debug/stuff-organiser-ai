@@ -6,10 +6,12 @@ import '../theme/app_theme.dart';
 import 'mascot_face.dart';
 import 'mascot_widget.dart';
 
-/// v0.8: ramen and berry painted from Leaf's food finals - head-only busts
-/// on their coded pastel tiles, dot-eye base, flat fills, no outlines.
-/// The pastel tile is painted in code at render time; note and speaker keep
-/// the old placeholder style (music pack is retired from the picker).
+/// v0.8.3: ramen and berry painted from Leaf's food finals - heads only
+/// on their coded pastel tiles, with the whole mascot inside the tile
+/// (nothing cropped at the edges). Dot-eye base, flat fills, no
+/// outlines. The pastel tile is painted in code at render time; note
+/// and speaker keep the old placeholder style (music pack is retired
+/// from the picker).
 
 void _drawPastelTile(Canvas canvas, Size size, Color color) {
   canvas.drawRect(Offset.zero & size, Paint()..color = color);
@@ -20,14 +22,10 @@ void paintMascotRamen(Canvas canvas, Size size, ThemePack pack, MascotMood mood)
   final double h = size.height;
 
   _drawPastelTile(canvas, size, const Color(0xFFF2EEE4));
-  // Bowl head mass, near-cropped by the bottom edge.
+  // Bowl head mass, fully inside the tile with a bottom margin.
   canvas.drawOval(
-    Rect.fromCenter(center: Offset(w * 0.5, h * 0.66), width: w * 0.9, height: h * 0.7),
+    Rect.fromCenter(center: Offset(w * 0.5, h * 0.62), width: w * 0.9, height: h * 0.62),
     Paint()..color = const Color(0xFFF8E2C8),
-  );
-  canvas.drawOval(
-    Rect.fromCenter(center: Offset(w * 0.5, h * 0.95), width: w * 0.34, height: h * 0.08),
-    Paint()..color = const Color(0xFFF3D6B4),
   );
   // Broth bed behind the bang-band.
   canvas.drawOval(
