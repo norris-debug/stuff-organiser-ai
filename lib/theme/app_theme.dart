@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Mascot variants. v1 uses painted placeholder art only (no image assets).
-enum MascotVariant { bunny, cat, robot, axolotl, ramen, berry, note, speaker }
+enum MascotVariant { bunny, cat, robot, axolotl, ramen, berry, note, speaker, redPanda, quokka, seaOtter, cake, salad, pizza, blindfolded, strawHat, ninja, idol, mage }
 
 extension MascotVariantX on MascotVariant {
   String get label => switch (this) {
@@ -13,6 +13,17 @@ extension MascotVariantX on MascotVariant {
         MascotVariant.berry => 'Berry',
         MascotVariant.note => 'Note',
         MascotVariant.speaker => 'Speaker',
+        MascotVariant.redPanda => 'Red Panda',
+        MascotVariant.quokka => 'Quokka',
+        MascotVariant.seaOtter => 'Sea Otter',
+        MascotVariant.cake => 'Cake',
+        MascotVariant.salad => 'Salad',
+        MascotVariant.pizza => 'Pizza',
+        MascotVariant.blindfolded => 'Blindfolded',
+        MascotVariant.strawHat => 'Straw Hat',
+        MascotVariant.ninja => 'Ninja',
+        MascotVariant.idol => 'Idol',
+        MascotVariant.mage => 'Mage',
       };
 }
 
@@ -42,7 +53,13 @@ const List<ThemePack> themePacks = <ThemePack>[
     emoji: '🌸',
     seed: Color(0xFF7C4DFF),
     accent: Color(0xFFFF8A65),
-    mascots: <MascotVariant>[MascotVariant.bunny, MascotVariant.robot],
+    mascots: <MascotVariant>[
+      MascotVariant.blindfolded,
+      MascotVariant.strawHat,
+      MascotVariant.ninja,
+      MascotVariant.idol,
+      MascotVariant.mage,
+    ],
   ),
   ThemePack(
     id: 'animals',
@@ -50,7 +67,13 @@ const List<ThemePack> themePacks = <ThemePack>[
     emoji: '🐾',
     seed: Color(0xFF2E7D32),
     accent: Color(0xFF9CCC65),
-    mascots: <MascotVariant>[MascotVariant.cat, MascotVariant.axolotl],
+    mascots: <MascotVariant>[
+      MascotVariant.cat,
+      MascotVariant.axolotl,
+      MascotVariant.redPanda,
+      MascotVariant.quokka,
+      MascotVariant.seaOtter,
+    ],
   ),
   ThemePack(
     id: 'food',
@@ -58,15 +81,13 @@ const List<ThemePack> themePacks = <ThemePack>[
     emoji: '🍜',
     seed: Color(0xFFE65100),
     accent: Color(0xFFFFB300),
-    mascots: <MascotVariant>[MascotVariant.ramen, MascotVariant.berry],
-  ),
-  ThemePack(
-    id: 'music',
-    label: 'Music',
-    emoji: '🎧',
-    seed: Color(0xFF283593),
-    accent: Color(0xFF00BCD4),
-    mascots: <MascotVariant>[MascotVariant.note, MascotVariant.speaker],
+    mascots: <MascotVariant>[
+      MascotVariant.ramen,
+      MascotVariant.berry,
+      MascotVariant.cake,
+      MascotVariant.salad,
+      MascotVariant.pizza,
+    ],
   ),
 ];
 

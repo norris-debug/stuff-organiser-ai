@@ -176,6 +176,17 @@ class _MascotPainter extends CustomPainter {
       MascotVariant.berry => _paintBerry,
       MascotVariant.note => _paintNote,
       MascotVariant.speaker => _paintSpeaker,
+      MascotVariant.redPanda => _paintRedPanda,
+      MascotVariant.quokka => _paintQuokka,
+      MascotVariant.seaOtter => _paintSeaOtter,
+      MascotVariant.cake => _paintCake,
+      MascotVariant.salad => _paintSalad,
+      MascotVariant.pizza => _paintPizza,
+      MascotVariant.blindfolded => _paintBlindfolded,
+      MascotVariant.strawHat => _paintStrawHat,
+      MascotVariant.ninja => _paintNinja,
+      MascotVariant.idol => _paintIdol,
+      MascotVariant.mage => _paintMage,
     };
     painter(canvas, size);
   }
@@ -387,6 +398,373 @@ class _MascotPainter extends CustomPainter {
     canvas.drawCircle(Offset(w / 2, h * 0.66), w * 0.14, cone);
     canvas.drawCircle(Offset(w / 2, h * 0.42), w * 0.06, cone);
     _paintFace(canvas, Offset(w / 2, h * 0.52), w * 0.13);
+  }
+
+  void _paintRedPanda(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint body = Paint()..color = pack.accent;
+    final Paint dark = Paint()..color = pack.seed;
+    final Offset head = Offset(w / 2, h * 0.6);
+    final double r = w * 0.3;
+
+    for (final double sign in <double>[-1, 1]) {
+      canvas.drawCircle(
+        Offset(head.dx + sign * r * 0.78, head.dy - r * 0.85),
+        w * 0.09,
+        dark,
+      );
+    }
+    canvas.drawCircle(head, r, body);
+    final Paint cheek = Paint()..color = pack.seed.withAlpha(120);
+    canvas.drawCircle(Offset(head.dx - r * 0.62, head.dy + r * 0.2), r * 0.3, cheek);
+    canvas.drawCircle(Offset(head.dx + r * 0.62, head.dy + r * 0.2), r * 0.3, cheek);
+    _paintFace(canvas, head, r);
+  }
+
+  void _paintQuokka(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint body = Paint()..color = pack.accent;
+    final Paint inner = Paint()..color = pack.seed;
+    final Offset head = Offset(w / 2, h * 0.6);
+    final double r = w * 0.3;
+
+    for (final double sign in <double>[-1, 1]) {
+      final Path ear = Path()
+        ..addOval(
+          Rect.fromCenter(
+            center: Offset(head.dx + sign * r * 0.8, head.dy - r * 0.8),
+            width: w * 0.14,
+            height: h * 0.18,
+          ),
+        );
+      canvas.drawPath(ear, body);
+    }
+    canvas.drawCircle(head, r, body);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(head.dx, head.dy + r * 0.35),
+        width: r * 0.9,
+        height: r * 0.5,
+      ),
+      inner.withAlpha(110),
+    );
+    _paintFace(canvas, head, r);
+  }
+
+  void _paintSeaOtter(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint body = Paint()..color = pack.accent;
+    final Offset head = Offset(w / 2, h * 0.58);
+    final double r = w * 0.29;
+
+    for (final double sign in <double>[-1, 1]) {
+      canvas.drawCircle(
+        Offset(head.dx + sign * r * 0.85, head.dy - r * 0.72),
+        w * 0.06,
+        body,
+      );
+    }
+    canvas.drawCircle(head, r, body);
+    final Paint muzzle = Paint()..color = pack.seed.withAlpha(120);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(head.dx, head.dy + r * 0.32),
+        width: r * 0.85,
+        height: r * 0.5,
+      ),
+      muzzle,
+    );
+    final Paint whisker = Paint()
+      ..color = _ink
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.012
+      ..strokeCap = StrokeCap.round;
+    for (final double sign in <double>[-1, 1]) {
+      canvas.drawLine(
+        Offset(head.dx + sign * r * 0.4, head.dy + r * 0.3),
+        Offset(head.dx + sign * r * 0.98, head.dy + r * 0.2),
+        whisker,
+      );
+      canvas.drawLine(
+        Offset(head.dx + sign * r * 0.4, head.dy + r * 0.44),
+        Offset(head.dx + sign * r * 0.95, head.dy + r * 0.52),
+        whisker,
+      );
+    }
+    _paintFace(canvas, head, r);
+  }
+
+  void _paintCake(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint body = Paint()..color = pack.accent;
+    final Paint icing = Paint()..color = pack.seed;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(w / 2, h * 0.68), width: w * 0.58, height: h * 0.3),
+        Radius.circular(w * 0.06),
+      ),
+      body,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(w / 2, h * 0.5), width: w * 0.44, height: h * 0.2),
+        Radius.circular(w * 0.06),
+      ),
+      body,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(w / 2, h * 0.42), width: w * 0.46, height: h * 0.08),
+        Radius.circular(w * 0.04),
+      ),
+      icing,
+    );
+    canvas.drawCircle(Offset(w / 2, h * 0.3), w * 0.05, icing);
+    _paintFace(canvas, Offset(w / 2, h * 0.6), w * 0.16);
+  }
+
+  void _paintSalad(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint bowl = Paint()..color = pack.accent;
+    final Paint leaf = Paint()..color = pack.seed;
+
+    canvas.drawArc(
+      Rect.fromCenter(center: Offset(w / 2, h * 0.55), width: w * 0.72, height: h * 0.5),
+      0,
+      math.pi,
+      true,
+      bowl,
+    );
+    for (final double dx in <double>[-0.22, -0.05, 0.12, 0.26]) {
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: Offset(w * (0.5 + dx), h * 0.4),
+          width: w * 0.16,
+          height: h * 0.13,
+        ),
+        leaf,
+      );
+    }
+    canvas.drawCircle(Offset(w * 0.42, h * 0.44), w * 0.04, bowl);
+    canvas.drawCircle(Offset(w * 0.6, h * 0.42), w * 0.035, bowl);
+    _paintFace(canvas, Offset(w / 2, h * 0.56), w * 0.15);
+  }
+
+  void _paintPizza(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint crust = Paint()..color = pack.accent;
+    final Paint cheese = Paint()..color = pack.seed;
+
+    final Path slice = Path()
+      ..moveTo(w / 2, h * 0.2)
+      ..lineTo(w * 0.2, h * 0.78)
+      ..lineTo(w * 0.8, h * 0.78)
+      ..close();
+    canvas.drawPath(slice, cheese);
+    final Path rim = Path()
+      ..moveTo(w * 0.2, h * 0.78)
+      ..quadraticBezierTo(w / 2, h * 0.86, w * 0.8, h * 0.78)
+      ..lineTo(w * 0.76, h * 0.72)
+      ..quadraticBezierTo(w / 2, h * 0.79, w * 0.24, h * 0.72)
+      ..close();
+    canvas.drawPath(rim, crust);
+    for (final Offset spot in const <Offset>[
+      Offset(0.5, 0.36),
+      Offset(0.4, 0.56),
+      Offset(0.6, 0.56),
+    ]) {
+      canvas.drawCircle(Offset(w * spot.dx, h * spot.dy), w * 0.05, crust);
+    }
+    _paintFace(canvas, Offset(w / 2, h * 0.5), w * 0.12);
+  }
+
+  void _paintBlindfolded(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint body = Paint()..color = pack.accent;
+    final Paint hair = Paint()..color = pack.seed;
+    final Paint band = Paint()..color = _ink;
+
+    final Offset head = Offset(w / 2, h * 0.58);
+    final double r = w * 0.28;
+    for (int i = -2; i <= 2; i++) {
+      final Path spike = Path()
+        ..moveTo(head.dx + i * r * 0.42 - r * 0.18, head.dy - r * 0.55)
+        ..lineTo(head.dx + i * r * 0.42, head.dy - r * (1.25 + (i == 0 ? 0.25 : 0.0)))
+        ..lineTo(head.dx + i * r * 0.42 + r * 0.18, head.dy - r * 0.55)
+        ..close();
+      canvas.drawPath(spike, hair);
+    }
+    canvas.drawCircle(head, r, body);
+    _paintFace(canvas, head, r);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(head.dx, head.dy - r * 0.12),
+          width: r * 1.9,
+          height: r * 0.42,
+        ),
+        Radius.circular(r * 0.2),
+      ),
+      band,
+    );
+  }
+
+  void _paintStrawHat(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint body = Paint()..color = pack.accent;
+    final Paint hat = Paint()..color = pack.seed;
+
+    final Offset head = Offset(w / 2, h * 0.58);
+    final double r = w * 0.27;
+    canvas.drawCircle(head, r, body);
+    _paintFace(canvas, head, r);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(head.dx, head.dy - r * 0.68),
+        width: r * 2.4,
+        height: h * 0.1,
+      ),
+      hat,
+    );
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(head.dx, head.dy - r * 0.9),
+        width: r * 1.4,
+        height: r * 1.1,
+      ),
+      math.pi,
+      math.pi,
+      true,
+      hat,
+    );
+    final Paint scar = Paint()
+      ..color = _ink
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.014
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(head.dx - r * 0.36, head.dy - r * 0.1),
+      Offset(head.dx - r * 0.36, head.dy + r * 0.3),
+      scar,
+    );
+    canvas.drawLine(
+      Offset(head.dx - r * 0.5, head.dy + r * 0.06),
+      Offset(head.dx - r * 0.22, head.dy + r * 0.06),
+      scar,
+    );
+  }
+
+  void _paintNinja(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint body = Paint()..color = pack.accent;
+    final Paint band = Paint()..color = pack.seed;
+
+    final Offset head = Offset(w / 2, h * 0.58);
+    final double r = w * 0.28;
+    canvas.drawCircle(head, r, body);
+    _paintFace(canvas, head, r);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(head.dx, head.dy - r * 0.45),
+          width: r * 2.1,
+          height: r * 0.34,
+        ),
+        Radius.circular(r * 0.16),
+      ),
+      band,
+    );
+    for (final double sign in <double>[-1, 1]) {
+      final Path tail = Path()
+        ..moveTo(head.dx + sign * r, head.dy - r * 0.45)
+        ..quadraticBezierTo(
+          head.dx + sign * r * 1.35,
+          head.dy - r * 0.6,
+          head.dx + sign * r * 1.25,
+          head.dy - r * 0.15,
+        )
+        ..lineTo(head.dx + sign * r * 1.05, head.dy - r * 0.3)
+        ..close();
+      canvas.drawPath(tail, band);
+    }
+  }
+
+  void _paintIdol(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint body = Paint()..color = pack.accent;
+    final Paint tail = Paint()..color = pack.seed;
+
+    final Offset head = Offset(w / 2, h * 0.6);
+    final double r = w * 0.28;
+    for (final double sign in <double>[-1, 1]) {
+      canvas.drawCircle(
+        Offset(head.dx + sign * r * 0.95, head.dy - r * 0.15),
+        w * 0.11,
+        tail,
+      );
+      canvas.drawCircle(
+        Offset(head.dx + sign * r * 1.08, head.dy + r * 0.45),
+        w * 0.08,
+        tail,
+      );
+    }
+    canvas.drawCircle(head, r, body);
+    _paintFace(canvas, head, r);
+    for (final double sign in <double>[-1, 1]) {
+      final Path fringe = Path()
+        ..moveTo(head.dx + sign * r * 0.2, head.dy - r)
+        ..quadraticBezierTo(
+          head.dx + sign * r * 0.75,
+          head.dy - r * 0.75,
+          head.dx + sign * r * 0.55,
+          head.dy - r * 0.35,
+        )
+        ..close();
+      canvas.drawPath(fringe, tail);
+    }
+    canvas.drawCircle(Offset(head.dx, head.dy - r * 1.02), w * 0.05, tail);
+  }
+
+  void _paintMage(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+    final Paint body = Paint()..color = pack.accent;
+    final Paint hat = Paint()..color = pack.seed;
+
+    final Offset head = Offset(w / 2, h * 0.6);
+    final double r = w * 0.27;
+    canvas.drawCircle(head, r, body);
+    _paintFace(canvas, head, r);
+    final Path cone = Path()
+      ..moveTo(head.dx, head.dy - r * 1.85)
+      ..lineTo(head.dx - r * 0.95, head.dy - r * 0.55)
+      ..lineTo(head.dx + r * 0.95, head.dy - r * 0.55)
+      ..close();
+    canvas.drawPath(cone, hat);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(head.dx, head.dy - r * 0.58),
+          width: r * 2.2,
+          height: h * 0.07,
+        ),
+        Radius.circular(w * 0.03),
+      ),
+      hat,
+    );
+    canvas.drawCircle(Offset(head.dx, head.dy - r * 2.05), w * 0.045, hat);
+    canvas.drawCircle(Offset(head.dx + r * 0.35, head.dy - r * 2.0), w * 0.03, hat);
   }
 
   void _paintFace(Canvas canvas, Offset center, double r) {
