@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Mascot variants. v1 uses painted placeholder art only (no image assets).
-enum MascotVariant { bunny, cat, robot, axolotl, ramen, berry, note, speaker, redPanda, quokka, seaOtter, cake, salad, pizza, blindfolded, strawHat, ninja, idol, mage }
+enum MascotVariant { bunny, cat, robot, axolotl, ramen, berry, note, speaker, redPanda, quokka, seaOtter, cake, salad, pizza, blindfolded, strawHat, twinTails, glassesBoy, bobCut }
 
 extension MascotVariantX on MascotVariant {
   String get label => switch (this) {
@@ -22,9 +22,9 @@ extension MascotVariantX on MascotVariant {
         MascotVariant.pizza => 'Pizza',
         MascotVariant.blindfolded => 'Blindfolded',
         MascotVariant.strawHat => 'Straw Hat',
-        MascotVariant.ninja => 'Ninja',
-        MascotVariant.idol => 'Idol',
-        MascotVariant.mage => 'Mage',
+        MascotVariant.twinTails => 'Twin Tails',
+        MascotVariant.glassesBoy => 'Glasses Boy',
+        MascotVariant.bobCut => 'Bob Cut',
       };
 }
 
@@ -57,9 +57,9 @@ const List<ThemePack> themePacks = <ThemePack>[
     mascots: <MascotVariant>[
       MascotVariant.blindfolded,
       MascotVariant.strawHat,
-      MascotVariant.ninja,
-      MascotVariant.idol,
-      MascotVariant.mage,
+      MascotVariant.twinTails,
+      MascotVariant.glassesBoy,
+      MascotVariant.bobCut,
     ],
   ),
   ThemePack(

@@ -188,9 +188,9 @@ class MascotPainter extends CustomPainter {
       case MascotVariant.pizza: paintMascotPizza(canvas, size, pack, mood); break;
       case MascotVariant.blindfolded: paintMascotBlindfolded(canvas, size, pack, mood); break;
       case MascotVariant.strawHat: paintMascotStrawHat(canvas, size, pack, mood); break;
-      case MascotVariant.ninja: paintMascotNinja(canvas, size, pack, mood); break;
-      case MascotVariant.idol: paintMascotIdol(canvas, size, pack, mood); break;
-      case MascotVariant.mage: paintMascotMage(canvas, size, pack, mood); break;
+      case MascotVariant.twinTails: paintMascotTwinTails(canvas, size, pack, mood); break;
+      case MascotVariant.glassesBoy: paintMascotGlassesBoy(canvas, size, pack, mood); break;
+      case MascotVariant.bobCut: paintMascotBobCut(canvas, size, pack, mood); break;
     }
   }
 
