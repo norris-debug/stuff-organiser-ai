@@ -28,7 +28,7 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // v0.7: tabs mount their screen fresh (the old IndexedStack kept every
+      // v0.7: tabs mount their screens fresh (the old IndexedStack kept every
       // tab alive, so a scan auto-save into the Tidy Plan would not show up
       // in the Plan tab until a full app restart).
       body: <Widget>[
@@ -80,7 +80,7 @@ class DashboardScreen extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             ),
             Text(
-              'v0.8.7+27',
+              'v0.8.8+28',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.outline,
               ),
