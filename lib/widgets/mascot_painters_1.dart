@@ -9,6 +9,8 @@ import 'mascot_widget.dart';
 /// the whole mascot inside the tile. Dot-eye base, flat fills, no
 /// outlines. Robot and axolotl keep their v1 placeholder shapes
 /// (they are not selectable since v0.6.8).
+/// v0.8.5: cat whisker dots removed per the closed mascot ruling - the
+/// face is dot-eyes with glints, nose, smile and cheek patches only.
 
 void _drawPastelTile(Canvas canvas, Size size, Color color) {
   canvas.drawRect(Offset.zero & size, Paint()..color = color);
@@ -124,16 +126,6 @@ void paintMascotCat(Canvas canvas, Size size, ThemePack pack, MascotMood mood) {
     ),
     Paint()..color = const Color(0xFF6E625A),
   );
-  final Paint dot = Paint()..color = kMascotInk;
-  for (final double sign in <double>[-1, 1]) {
-    for (int i = 0; i < 3; i++) {
-      canvas.drawCircle(
-        Offset(head.dx + sign * r * (0.6 + i * 0.075), head.dy + r * (0.36 + i * 0.08)),
-        w * 0.008,
-        dot,
-      );
-    }
-  }
   paintMascotFace(canvas, head, r, pack, mood, blush: const Color(0xFFF0C0C0));
 }
 

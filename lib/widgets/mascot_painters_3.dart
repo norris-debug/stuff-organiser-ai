@@ -9,6 +9,8 @@ import 'mascot_widget.dart';
 /// the neck and the whole mascot inside the tile. Dot-eye base, flat
 /// fills, no outlines. The pastel tile is painted in code at render
 /// time; that per-mascot pastel is the coded bg value.
+/// v0.8.5: otter whisker dots removed per Leaf's closed ruling - the
+/// face is dot-eyes with glints, nose, smile and cheek patches only.
 
 void _drawPastelTile(Canvas canvas, Size size, Color color) {
   canvas.drawRect(Offset.zero & size, Paint()..color = color);
@@ -141,15 +143,5 @@ void paintMascotSeaOtter(Canvas canvas, Size size, ThemePack pack, MascotMood mo
     ),
     Paint()..color = const Color(0xFF6E4B2F),
   );
-  final Paint dot = Paint()..color = kMascotInk;
-  for (final double sign in <double>[-1, 1]) {
-    for (int i = 0; i < 3; i++) {
-      canvas.drawCircle(
-        Offset(head.dx + sign * r * (0.6 + i * 0.075), head.dy + r * (0.34 + i * 0.085)),
-        w * 0.008,
-        dot,
-      );
-    }
-  }
   paintMascotFace(canvas, head, r, pack, mood, blush: const Color(0xFFF0C9A0));
 }
