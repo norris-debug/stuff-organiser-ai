@@ -1,14 +1,5 @@
 part of 'scan_flow.dart';
 
-int _photoSeed(Uint8List bytes) {
-  int seed = 7;
-  final int end = bytes.length < 2048 ? bytes.length : 2048;
-  for (int i = 0; i < end; i++) {
-    seed = (seed * 31 + bytes[i]) % 0x7FFFFFFF;
-  }
-  return seed;
-}
-
 int _photosSeed(List<_PhotoItem> photos) {
   int seed = 7;
   for (final _PhotoItem photo in photos) {

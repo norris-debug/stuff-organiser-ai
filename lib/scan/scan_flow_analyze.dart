@@ -6,9 +6,9 @@ extension _ScanAnalyze on _ScanFlowScreenState {
     await _analyze();
   }
 
-  /// v0.6.9: interpretation is the Cellulose lane. The in-app Gemini call is
-  /// gone, so the plan comes from the offline coach while the thinking state
-  /// covers the wait for the lane wiring.
+  /// v0.7: interpretation stays the Cellulose lane. The plan comes from the
+  /// offline coach with the picked venue folded in, and the thinking state
+  /// on the result page covers the wait for the lane wiring.
   Future<void> _analyze() async {
     if (_photos.isEmpty) return;
     final int runId = ++_runId;
@@ -19,13 +19,10 @@ extension _ScanAnalyze on _ScanFlowScreenState {
       _error = null;
       _lines = <_ChatLine>[];
       _revealed = 0;
-      _afterBytes = null;
-      _afterUrl = null;
-      _afterLoading = true;
     });
 
     await Future<void>.delayed(const Duration(milliseconds: 1200));
-    final _ScanPlan plan = _demoPlan(_photos, notes);
+    final _ScanPlan plan = _demoPlan(_photos, notes).withVenue(_scanVenue);
 
     if (!mounted || runId != _runId) return;
     _setUiState(() {
@@ -33,7 +30,6 @@ extension _ScanAnalyze on _ScanFlowScreenState {
       _analyzing = false;
     });
     _buildChatLines();
-    unawaited(_generateAfterPhoto(plan, runId));
   }
 
   String _titleCase(String value) {
