@@ -11,6 +11,32 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
   Widget _buildChat(BuildContext context) {
     final List<_ChatLine> visible = _lines.take(_revealed).toList();
     final bool allRevealed = _revealed >= _lines.length;
+    // v0.8.9: while the reply keyboard is up the bottom action button
+    // hides, so the reply field keeps its height instead of compressing.
+    final bool keyboardUp = MediaQuery.of(context).viewInsets.bottom > 0;
+    final bool hideButtons = keyboardUp && _showChatReplyBar;
+    Widget? actionButton;
+    if (!hideButtons) {
+      if (_awaitingRecognition) {
+        actionButton = FilledButton.icon(
+          onPressed: _openRecognitionPaste,
+          icon: const Icon(Icons.paste_rounded),
+          label: const Text('Paste recognized list'),
+        );
+      } else if (allRevealed) {
+        actionButton = FilledButton.icon(
+          onPressed: _openResult,
+          icon: const Icon(Icons.checklist_rounded),
+          label: const Text('Show my tidy plan'),
+        );
+      } else {
+        actionButton = OutlinedButton.icon(
+          onPressed: _revealNext,
+          icon: const Icon(Icons.arrow_downward),
+          label: const Text('Next'),
+        );
+      }
+    }
     return Column(
       children: <Widget>[
         Expanded(
@@ -30,29 +56,41 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (_awaitingRecognition)
-                  FilledButton.icon(
-                    onPressed: _openRecognitionPaste,
-                    icon: const Icon(Icons.paste_rounded),
-                    label: const Text('Paste recognized list'),
-                  )
-                else if (allRevealed)
-                  FilledButton.icon(
-                    onPressed: _openResult,
-                    icon: const Icon(Icons.checklist_rounded),
-                    label: const Text('Show my tidy plan'),
-                  )
-                else
-                  OutlinedButton.icon(
-                    onPressed: _revealNext,
-                    icon: const Icon(Icons.arrow_downward),
-                    label: const Text('Next'),
-                  ),
+                if (_showChatReplyBar) _chatReplyBar(context),
+                if (actionButton != null) actionButton,
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  /// v0.8.9: the reply bar for coach confirmation points. Submits on the
+  /// send key or the send button; the answer lands as a user bubble.
+  Widget _chatReplyBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              controller: _chatReplyController,
+              onSubmitted: (_) => _submitChatReply(),
+              textInputAction: TextInputAction.send,
+              decoration: const InputDecoration(
+                labelText: 'Reply to the coach',
+                isDense: true,
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Send reply',
+            onPressed: _submitChatReply,
+            icon: const Icon(Icons.send_rounded),
+          ),
+        ],
+      ),
     );
   }
 
@@ -212,7 +250,7 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
         Row(
           children: <Widget>[
             Expanded(
-              child: OutlinedButton.icon(
+              child: FilledButton.icon(
                 onPressed: _saveThenNewRound,
                 icon: const Icon(Icons.add_a_photo_outlined),
                 label: const Text('Scan another room'),
