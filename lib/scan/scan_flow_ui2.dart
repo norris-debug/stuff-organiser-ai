@@ -30,7 +30,13 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (allRevealed)
+                if (_awaitingRecognition)
+                  FilledButton.icon(
+                    onPressed: _openRecognitionPaste,
+                    icon: const Icon(Icons.paste_rounded),
+                    label: const Text('Paste recognized list'),
+                  )
+                else if (allRevealed)
                   FilledButton.icon(
                     onPressed: _openResult,
                     icon: const Icon(Icons.checklist_rounded),
