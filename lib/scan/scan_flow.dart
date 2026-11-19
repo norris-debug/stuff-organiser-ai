@@ -13,16 +13,18 @@ import 'package:speech_to_text/speech_to_text.dart' as speech;
 import '../theme/app_theme.dart';
 import '../widgets/mascot_widget.dart';
 
-/// Scan feature (v0.6).
+/// Scan feature (v0.6.1).
 ///
 /// The coach looks at the photos that were actually taken, names the visible
 /// setting and how messy it really is, and proposes a number of concrete
-/// physical actions that scales with the messiness. v0.6 adds a context step
-/// before analysis: up to four photos (extra angles for what the camera
-/// cannot see), typed or dictated notes, and a Confirm & Analyse button so
-/// nothing runs until the user says so. With a Gemini key an "after tidying"
-/// picture is generated from the same photo, otherwise a keyless concept
-/// image is used so the flow never breaks.
+/// physical actions that scales with the messiness. v0.6 added a context step
+/// before analysis: photos (extra angles for what the camera cannot see),
+/// typed or dictated notes, and a Next button so nothing runs until the user
+/// says so. v0.6.1 lets one gallery tap add several photos at once and keeps
+/// the type-to-AI box right beside the Next button, so the whole context step
+/// fits on one screen. Up to six photos are accepted per scan. With a Gemini
+/// key an "after tidying" picture is generated from the same photo, otherwise
+/// a keyless concept image is used so the flow never breaks.
 class ScanFlowScreen extends StatefulWidget {
   const ScanFlowScreen({
     super.key,
@@ -105,7 +107,7 @@ class _DemoBank {
   final List<String> habits;
 }
 
-/// One photo in the scan: the main shot plus up to three extra angles.
+/// One photo in the scan: the main shot plus up to five extra angles.
 class _PhotoItem {
   const _PhotoItem({required this.bytes, required this.mime});
 
@@ -140,8 +142,8 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     'Okay, next.',
   ];
 
-  /// Maximum photos per scan: the main shot plus three extra angles.
-  static const int _maxPhotos = 4;
+  /// Maximum photos per scan: the main shot plus five extra angles.
+  static const int _maxPhotos = 6;
 
   static const String _kPrompt = '''
 You are Tidy Coach, a friendly anime organising assistant inside the Stuff Organiser AI app.
@@ -215,11 +217,13 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
   // Context stage: photos, notes, confirm
   // ---------------------------------------------------------------------
 
-  Future<void> _capture(ImageSource source) async {
+  /// One shot from the camera. The user can press the button again to add
+  /// another photo until the cap is reached.
+  Future<void> _captureCamera() async {
     if (_photos.length >= _maxPhotos) return;
     try {
       final XFile? file = await _picker.pickImage(
-        source: source,
+        source: ImageSource.camera,
         imageQuality: 80,
         maxWidth: 1280,
       );
@@ -231,6 +235,44 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
           ..._photos,
           _PhotoItem(bytes: bytes, mime: _mimeFor(file.path)),
         ];
+        _error = null;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Could not open the camera or the gallery. Please try again.';
+      });
+    }
+  }
+
+  /// Several photos in one tap from the gallery. Whatever the picker returns
+  /// is trimmed to the room left under the cap and added in a single rebuild.
+  Future<void> _pickFromGallery() async {
+    final int room = _maxPhotos - _photos.length;
+    if (room <= 0) return;
+    try {
+      final List<XFile> files = await _picker.pickMultiImage(
+        imageQuality: 80,
+        maxWidth: 1280,
+      );
+      if (files.isEmpty) return;
+      final List<XFile> selected = files.length > room
+          ? files.sublist(0, room)
+          : files;
+      final List<_PhotoItem> picked = <_PhotoItem>[];
+      for (final XFile file in selected) {
+        try {
+          final Uint8List bytes = await file.readAsBytes();
+          if (!mounted) return;
+          picked.add(_PhotoItem(bytes: bytes, mime: _mimeFor(file.path)));
+        } catch (_) {
+          // Skip a photo that cannot be read instead of losing the whole batch.
+        }
+      }
+      if (picked.isEmpty) return;
+      if (!mounted) return;
+      setState(() {
+        _photos = <_PhotoItem>[..._photos, ...picked];
         _error = null;
       });
     } catch (_) {
@@ -476,10 +518,13 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
   String _promptWithNotes(String notes) {
     final String trimmed = notes.trim();
     if (trimmed.isEmpty) return _kPrompt;
-    return '$_kPrompt\n\nUser notes typed or dictated for these photos (they may '
-        'mention items the camera cannot see, for example things underneath '
-        'the visible pile). Treat them as real context for what is present:\n'
-        '$trimmed';
+    return _kPrompt + '''
+
+
+User notes typed or dictated for these photos (they may mention items the
+camera cannot see, for example things underneath the visible pile). Treat
+them as real context for what is present:
+$trimmed''';
   }
 
   String _responseText(String body) {
@@ -1318,9 +1363,9 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
         const SizedBox(height: 8),
         Text(
           'Photograph a messy table, desk, shelf, floor, bed or counter. Add '
-          'up to three extra angles - open the drawer, lift the pile - and '
-          'type or dictate anything the camera cannot see. Nothing is '
-          'analysed until you tap Confirm & Analyse.',
+          'up to six photos in total - extra angles welcome, so open the '
+          'drawer or lift the pile - and type or dictate anything the camera '
+          'cannot see. Nothing is analysed until you tap Next.',
           style: theme.textTheme.bodyMedium,
         ),
         const SizedBox(height: 16),
@@ -1343,8 +1388,7 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
           children: <Widget>[
             Expanded(
               child: FilledButton.icon(
-                onPressed:
-                    (_analyzing || !canAddMore) ? null : () => _capture(ImageSource.camera),
+                onPressed: (_analyzing || !canAddMore) ? null : _captureCamera,
                 icon: const Icon(Icons.photo_camera_outlined),
                 label: Text(hasPhotos ? 'Add photo' : 'Camera'),
               ),
@@ -1352,8 +1396,7 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
             const SizedBox(width: 12),
             Expanded(
               child: OutlinedButton.icon(
-                onPressed:
-                    (_analyzing || !canAddMore) ? null : () => _capture(ImageSource.gallery),
+                onPressed: (_analyzing || !canAddMore) ? null : _pickFromGallery,
                 icon: const Icon(Icons.photo_library_outlined),
                 label: Text(hasPhotos ? 'Add from gallery' : 'Gallery'),
               ),
@@ -1363,18 +1406,55 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
         if (hasPhotos) ...<Widget>[
           const SizedBox(height: 10),
           Text(
-            '${_photos.length} of 4 photos. The first one is the main view.',
+            '${_photos.length} of $_maxPhotos photos. The first one is the main view.',
             style: theme.textTheme.bodySmall,
           ),
         ],
         const SizedBox(height: 14),
-        _notesCardInput(context),
-        const SizedBox(height: 16),
-        FilledButton.icon(
-          onPressed: (_analyzing || !hasPhotos) ? null : _confirmAndAnalyse,
-          icon: const Icon(Icons.task_alt),
-          label: Text(_analyzing ? 'Analysing...' : 'Confirm & Analyse'),
+        Text(
+          'Type to the AI (optional) - anything the camera cannot see, for '
+          'example what is under the pile.',
+          style: theme.textTheme.bodySmall,
         ),
+        const SizedBox(height: 6),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                controller: _notesController,
+                minLines: 1,
+                maxLines: 3,
+                maxLength: 600,
+                decoration: InputDecoration(
+                  hintText: 'e.g. socks under the clothes in the drawer',
+                  counterText: '',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    tooltip: 'Dictate notes',
+                    icon: Icon(
+                      _listening ? Icons.mic : Icons.mic_none,
+                      color: _listening ? theme.colorScheme.primary : null,
+                    ),
+                    onPressed: _toggleDictation,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            FilledButton.icon(
+              onPressed: (_analyzing || !hasPhotos) ? null : _confirmAndAnalyse,
+              icon: const Icon(Icons.task_alt),
+              label: Text(_analyzing ? 'Analysing...' : 'Next'),
+            ),
+          ],
+        ),
+        if (_listening) ...<Widget>[
+          const SizedBox(height: 4),
+          Text(
+            'Listening... tap the mic to stop.',
+            style: theme.textTheme.bodySmall,
+          ),
+        ],
         if (_analyzing) ...<Widget>[
           const SizedBox(height: 20),
           const LinearProgressIndicator(),
@@ -1489,63 +1569,6 @@ No markdown, no code fences and no extra commentary. Keep a warm, encouraging to
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _notesCardInput(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                const Icon(Icons.sticky_note_2_outlined),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'What should I know? (optional)',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Dictate notes',
-                  icon: Icon(
-                    _listening ? Icons.mic : Icons.mic_none,
-                    color:
-                        _listening ? theme.colorScheme.primary : null,
-                  ),
-                  onPressed: _toggleDictation,
-                ),
-              ],
-            ),
-            if (_listening) ...<Widget>[
-              const SizedBox(height: 4),
-              Text(
-                'Listening... tap the mic to stop.',
-                style: theme.textTheme.bodySmall,
-              ),
-            ],
-            const SizedBox(height: 8),
-            TextField(
-              controller: _notesController,
-              minLines: 2,
-              maxLines: 4,
-              maxLength: 600,
-              decoration: const InputDecoration(
-                hintText:
-                    'e.g. socks under the clothes in the drawer, files in the bottom pile',
-                border: OutlineInputBorder(),
-                counterText: '',
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
