@@ -155,10 +155,6 @@ extension _ScanChatFlow on _ScanFlowScreenState {
         buffer.writeln('- $habit');
       }
     }
-    buffer.writeln();
-    buffer.writeln(
-      'After-shot: AI concept sketch built from the setting text.',
-    );
     return buffer.toString();
   }
 
@@ -168,6 +164,7 @@ extension _ScanChatFlow on _ScanFlowScreenState {
     _setUiState(() {
       _photos = <_PhotoItem>[];
       _notesController.clear();
+      _venueController.clear();
       _listening = false;
       _lines = <_ChatLine>[];
       _revealed = 0;
@@ -176,9 +173,6 @@ extension _ScanChatFlow on _ScanFlowScreenState {
         observations: <String>[],
         habits: <String>[],
       );
-      _afterBytes = null;
-      _afterUrl = null;
-      _afterLoading = false;
       _error = null;
       _analyzing = false;
     });

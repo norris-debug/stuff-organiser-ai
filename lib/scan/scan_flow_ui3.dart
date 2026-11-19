@@ -1,121 +1,27 @@
 part of 'scan_flow.dart';
 
 extension _ScanResultCards on _ScanFlowScreenState {
+  /// v0.7: the thinking state lives here on the result page. The old AI
+  /// concept sketch placeholder is gone - the organized render comes back
+  /// from the Cellulose lane instead.
   Widget _afterCard(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme scheme = theme.colorScheme;
     return Card(
-      // The theme pack is part of the key so a different pack rebuilds the card.
-      key: ValueKey<Object>(widget.pack),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(12),
-            ),
-            child: AspectRatio(
-              aspectRatio: 4 / 3,
-              child: _afterImage(scheme),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'After tidying',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(_afterCaption(), style: theme.textTheme.bodySmall),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _afterCaption() {
-    if (_afterLoading) {
-      return 'Generating the after-tidying picture from your photo...';
-    }
-    return 'After tidying - AI concept sketch built from the setting.';
-  }
-
-  Widget _afterImage(ColorScheme scheme) {
-    final Uint8List? bytes = _afterBytes;
-    if (bytes != null) {
-      return Image.memory(
-        bytes,
-        fit: BoxFit.cover,
-        errorBuilder: (
-          BuildContext context,
-          Object error,
-          StackTrace? stackTrace,
-        ) =>
-            _conceptPlaceholder(scheme),
-      );
-    }
-    final String? url = _afterUrl;
-    if (url != null) {
-      return Image.network(
-        url,
-        fit: BoxFit.cover,
-        loadingBuilder: (
-          BuildContext context,
-          Widget child,
-          ImageChunkEvent? progress,
-        ) {
-          if (progress == null) return child;
-          return _loadingPlaceholder(scheme);
-        },
-        errorBuilder: (
-          BuildContext context,
-          Object error,
-          StackTrace? stackTrace,
-        ) =>
-            _conceptPlaceholder(scheme),
-      );
-    }
-    return _loadingPlaceholder(scheme);
-  }
-
-  Widget _loadingPlaceholder(ColorScheme scheme) {
-    return Container(
-      color: scheme.surfaceContainerHighest,
-      child: Center(
-        child: CircularProgressIndicator(color: scheme.primary),
-      ),
-    );
-  }
-
-  Widget _conceptPlaceholder(ColorScheme scheme) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: <Color>[scheme.secondaryContainer, scheme.primaryContainer],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Icon(
-              Icons.auto_awesome,
-              size: 32,
-              color: scheme.onSecondaryContainer,
-            ),
-            const SizedBox(height: 8),
+            _ThinkingLine(mascot: widget.mascot, pack: widget.pack),
+            const SizedBox(height: 10),
             Text(
-              'Concept preview',
-              style: TextStyle(color: scheme.onSecondaryContainer),
+              'The organized render and the checked plan come back from the '
+              'Cellulose lane and land in the Tidy Plan tab.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -201,11 +107,6 @@ extension _ScanResultCards on _ScanFlowScreenState {
             ),
             const SizedBox(height: 8),
             ...habitWidgets,
-            const SizedBox(height: 12),
-            Text(
-              'After-shot: AI concept sketch built from the setting text.',
-              style: theme.textTheme.bodySmall,
-            ),
           ],
         ),
       ),
