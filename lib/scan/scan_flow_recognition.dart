@@ -6,6 +6,7 @@ part of 'scan_flow.dart';
 /// handoff format: 85%+ confirmed, 50-84% verify, under 50% flagged.
 /// The list is pasted into the coach chat on the interim route,
 /// mirroring how render slots attach from the lane post-back.
+/// v0.8.7: the intake flow itself lives in scan_flow_recognition_flow.dart.
 class _RecognizedObject {
   const _RecognizedObject(this.label, this.tier);
 
