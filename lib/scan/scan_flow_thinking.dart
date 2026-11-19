@@ -5,12 +5,10 @@ class _ThinkingLine extends StatefulWidget {
   const _ThinkingLine({
     required this.mascot,
     required this.pack,
-    this.compact = false,
   });
 
   final MascotVariant mascot;
   final ThemePack pack;
-  final bool compact;
 
   @override
   State<_ThinkingLine> createState() => _ThinkingLineState();
@@ -42,17 +40,15 @@ class _ThinkingLineState extends State<_ThinkingLine>
             MascotWidget(
               variant: widget.mascot,
               pack: widget.pack,
-              size: widget.compact ? 24 : 44,
+              size: 44,
               celebrationTick: 0,
             ),
             const SizedBox(width: 8),
             Text(
               label,
-              style: widget.compact
-                  ? Theme.of(context).textTheme.bodySmall
-                  : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         );
