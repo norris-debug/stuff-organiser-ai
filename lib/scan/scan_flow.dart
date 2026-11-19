@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -570,7 +569,7 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
       _mimeType = file.mimeType ?? 'image/jpeg';
     });
 
-    final _ScanPlan plan;
+    _ScanPlan plan;
     bool usedFallback = false;
     if ((_apiKey ?? '').isNotEmpty) {
       try {
