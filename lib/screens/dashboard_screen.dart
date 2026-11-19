@@ -25,14 +25,14 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _index,
-        children: <Widget>[
-          DashboardScreen(onOpenPlan: () => setState(() => _index = 1)),
-          const PlanScreen(),
-          const SettingsScreen(),
-        ],
-      ),
+      // v0.7: tabs mount their screen fresh (the old IndexedStack kept every
+      // tab alive, so a scan auto-save into the Tidy Plan would not show up
+      // in the Plan tab until a full app restart).
+      body: <Widget>[
+        DashboardScreen(onOpenPlan: () => setState(() => _index = 1)),
+        const PlanScreen(),
+        const SettingsScreen(),
+      ][_index],
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const QuickAddScreen()),
@@ -77,7 +77,7 @@ class DashboardScreen extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             ),
             Text(
-              'v0.6.8+16',
+              'v0.7.0+19',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -382,7 +382,7 @@ class _ScanCard extends StatelessWidget {
                   ),
                 ),
               ),
-              child: const Text('Scan'),
+              child: const Text('Tidy Up'),
             ),
           ],
         ),
