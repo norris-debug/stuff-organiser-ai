@@ -18,8 +18,7 @@ part 'scan_flow_capture.dart';
 part 'scan_flow_dictation.dart';
 part 'scan_flow_analyze.dart';
 part 'scan_flow_after.dart';
-part 'scan_flow_demo.dart';
-part 'scan_flow_demo_banks.dart';
+part 'scan_flow_recognition.dart';
 part 'scan_flow_chat.dart';
 part 'scan_flow_ui1.dart';
 part 'scan_flow_ui2.dart';
@@ -36,6 +35,9 @@ part 'scan_flow_loader.dart';
 /// that is auto-saved into the Tidy Plan tab. Interpretation stays on the
 /// Cellulose lane (v0.6.9), the Next control remains rate limited, and the
 /// result stage now carries the thinking state.
+/// v0.8.5: the coach drafts from the recognition lane's object list
+/// instead of the canned demo script, so the dialogue follows the
+/// photos that were actually taken.
 class ScanFlowScreen extends StatefulWidget {
   const ScanFlowScreen({
     super.key,
@@ -118,19 +120,6 @@ class _ScanPlan {
   }
 }
 
-/// Offline play book used by the demo coach.
-class _DemoBank {
-  const _DemoBank({
-    required this.observations,
-    required this.suggestions,
-    required this.habits,
-  });
-
-  final List<String> observations;
-  final List<_Suggestion> suggestions;
-  final List<String> habits;
-}
-
 /// One photo in the scan: the main shot plus up to five extra angles.
 class _PhotoItem {
   const _PhotoItem({required this.bytes, required this.mime});
@@ -163,6 +152,9 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
 
   List<_PhotoItem> _photos = <_PhotoItem>[];
   bool _analyzing = false;
+
+  /// v0.8.5: true while the coach chat waits for the recognized list.
+  bool _awaitingRecognition = false;
   String? _error;
   List<_ChatLine> _lines = <_ChatLine>[];
   int _revealed = 0;
@@ -310,5 +302,26 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     });
     await prefs.setString(_tidyPlanStorageKey, jsonEncode(parts));
     return true;
+  }
+
+  void _resetFlow() {
+    _runId++;
+    unawaited(_stopListening());
+    _setUiState(() {
+      _photos = <_PhotoItem>[];
+      _notesController.clear();
+      _venueController.clear();
+      _listening = false;
+      _lines = <_ChatLine>[];
+      _revealed = 0;
+      _stage = _ScanStage.pick;
+      _plan = const _ScanPlan(
+        observations: <String>[],
+        habits: <String>[],
+      );
+      _error = null;
+      _analyzing = false;
+      _awaitingRecognition = false;
+    });
   }
 }
