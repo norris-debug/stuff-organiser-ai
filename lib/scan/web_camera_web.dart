@@ -158,7 +158,7 @@ class _WebCameraSheetState extends State<_WebCameraSheet> {
       ..style.width = '100%'
       ..style.height = '100%'
       ..append(video);
-    final html.MediaStream attached = stream!;
+    final html.MediaStream attached = stream;
     video.srcObject = attached;
     try {
       // Explicit play for browsers that skip autoplay on reattach; the
