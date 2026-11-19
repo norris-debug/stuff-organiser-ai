@@ -1,5 +1,12 @@
 part of 'scan_flow.dart';
 
+/// v0.8.2: the tidied-up render for each uploaded angle, kept in scan
+/// order. The Cellulose lane returns one organized render per angle; until
+/// the automated lane wiring lands, each render is attached to its slot
+/// from the lane's post-back. Cleared at the start of every analysis so a
+/// new round never shows a previous round's renders.
+final List<Uint8List?> _angleRenders = <Uint8List?>[];
+
 extension _ScanChatResultUi on _ScanFlowScreenState {
   Widget _buildChat(BuildContext context) {
     final List<_ChatLine> visible = _lines.take(_revealed).toList();
@@ -166,6 +173,8 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
         const SizedBox(height: 14),
         _afterCard(context),
         const SizedBox(height: 14),
+        _renderGalleryCard(context),
+        const SizedBox(height: 14),
         _notesCard(context),
         const SizedBox(height: 16),
         Row(
@@ -189,6 +198,162 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
         ),
       ],
     );
+  }
+
+  /// v0.8.2: the cleaned-up room gallery - one slot per uploaded angle so
+  /// the tidied-up views read together as one holistic picture.
+  Widget _renderGalleryCard(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme scheme = theme.colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Cleaned-up room',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'One tidied-up render per angle. The Cellulose lane reads '
+              'every photo you uploaded and returns the cleaned-up view '
+              'for each - attach each render to its slot as it lands.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (int i = 0; i < _photos.length; i++) _renderSlot(context, i),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _renderSlot(BuildContext context, int index) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme scheme = theme.colorScheme;
+    final _PhotoItem photo = _photos[index];
+    final Uint8List? render = _renderAt(index);
+    final String label = index == 0 ? 'Main view' : 'Angle ${index + 1}';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.memory(
+                  photo.bytes,
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      label,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      render == null
+                          ? 'Render pending from the Cellulose lane.'
+                          : 'Tidied-up view for this angle.',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (render == null)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _pickRender(index),
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                label: Text('Attach the render for $label'),
+              ),
+            )
+          else
+            Stack(
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    render,
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                  ),
+                ),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: InkWell(
+                    onTap: () => _removeRender(index),
+                    customBorder: const CircleBorder(),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: scheme.surface.withAlpha(230),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: scheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickRender(int index) async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+    final Uint8List bytes = await picked.readAsBytes();
+    if (!mounted) return;
+    _setUiState(() {
+      while (_angleRenders.length <= index) {
+        _angleRenders.add(null);
+      }
+      _angleRenders[index] = bytes;
+    });
+  }
+
+  void _removeRender(int index) {
+    _setUiState(() {
+      if (index < _angleRenders.length) {
+        _angleRenders[index] = null;
+      }
+    });
+  }
+
+  Uint8List? _renderAt(int index) {
+    if (index >= _angleRenders.length) return null;
+    return _angleRenders[index];
   }
 
   Widget _chipsRow(BuildContext context) {
