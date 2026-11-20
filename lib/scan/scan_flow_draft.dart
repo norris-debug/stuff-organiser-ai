@@ -12,7 +12,7 @@ part of 'scan_flow.dart';
 // wording rotates.
 
 extension _ScanDrafting on _ScanFlowScreenState {
-  String _bucketSuggestion(int bucket, List<_RecognizedObject> items) {
+  _Suggestion _bucketSuggestion(int bucket, List<_RecognizedObject> items) {
     final String labels = _joinLabels(items);
     switch (bucket) {
       case 0:
