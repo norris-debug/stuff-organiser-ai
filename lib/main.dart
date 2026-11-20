@@ -24,7 +24,7 @@ Future<void> main() async {
   // technology is detected. The URL flag (or the dart-define) forces it
   // on for the whole session.
   if (_semanticsRequested()) {
-    unawaited(SemanticsBinding.ensureSemantics());
+    SemanticsBinding.instance.ensureSemantics();
   }
 
   final prefs = await SharedPreferences.getInstance();
