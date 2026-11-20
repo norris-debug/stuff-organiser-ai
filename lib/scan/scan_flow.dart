@@ -255,7 +255,12 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     final String raw = prefs.getString(_tidyPlanStorageKey) ?? '';
     List<dynamic> parts;
     try {
-      final dynamic decoded = jsonDecode(raw);
+      // v0.8.18: a store that was never written reads back as an empty
+      // string, and jsonDecode('') throws - the corrupt guard below would
+      // then no-op every FIRST scan's save. A blank store is an empty
+      // list; real corruption still throws into the guard.
+      final dynamic decoded =
+          raw.trim().isEmpty ? <dynamic>[] : jsonDecode(raw);
       if (decoded is List<dynamic>) {
         parts = decoded;
       } else {
@@ -317,4 +322,21 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
       _answeredConfirmations.clear();
     });
   }
+}
+
+/// Picks a pastel-tile emoji for a scanned venue by name, so auto-added
+/// spaces read like the rest of "Your spaces".
+String _emojiForVenue(String name) {
+  final String n = name.toLowerCase();
+  if (n.contains('kitchen')) return '🍳';
+  if (n.contains('bed')) return '🛏️';
+  if (n.contains('wardrobe') || n.contains('closet')) return '👕';
+  if (n.contains('desk') || n.contains('office') || n.contains('study')) return '🗂️';
+  if (n.contains('bath')) return '🛁';
+  if (n.contains('living') || n.contains('lounge')) return '🛋️';
+  if (n.contains('dining')) return '🍽️';
+  if (n.contains('laundry')) return '🧺';
+  if (n.contains('garage')) return '🧰';
+  if (n.contains('balcony') || n.contains('garden')) return '🪴';
+  return '📦';
 }
