@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.10+30
+version: 0.8.11+31
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -59,3 +59,9 @@ flutter:
 # the anime fringe outlines are smoothed to soft rounded waves (the
 # blindfolded spiky outline stays untouched as the locked design); the
 # dashboard version badge is synced again (it had lagged at v0.8.8+28).
+# v0.8.11+31: the Paste Recognized List button is gone from the coach
+# chat action row - paste survives as a quiet inline link inside the
+# waiting bubble (gated on the awaiting-recognition state), so a scan
+# still can't dead-end while the interim manual route lasts. The
+# result-stage UI members split into scan_flow_ui2b.dart to keep every
+# scan library file push- and verify-sized.
