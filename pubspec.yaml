@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.18+38
+version: 0.8.19+39
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -123,3 +123,11 @@ flutter:
 # recognition -> save + venue auto-add + unpacked items, flagged reads
 # out). image_picker_platform_interface rides as a dev dependency for the
 # picker double used by the integration test.
+# v0.8.19+39: the forward action opens pre-addressed - the web mailto
+# compose carries afantashoon@gmail.com as the recipient and the in-app
+# labeling names the destination (the APK share path cannot prefill a
+# recipient, so the hint covers it); README documents the lane. Plus the
+# R3-F1 fix: the scan save mirrors the Plan tab's cast, so a valid-JSON-
+# but-non-List store reports the honest corrupt banner on both sides
+# instead of being silently overwritten - pinned by two new widget tests
+# (Plan tab non-List banner + scan-side no-overwrite).
