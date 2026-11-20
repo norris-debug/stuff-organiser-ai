@@ -24,13 +24,17 @@ extension _ScanChatFlow on _ScanFlowScreenState {
         ),
       );
     }
-    for (final String observation in plan.observations) {
+    for (int i = 0; i < plan.observations.length; i++) {
       // v0.8.9: verify- and flagged-tier reads are the coach's
       // confirmation points - the user can answer them inline.
-      final bool isConfirmation =
-          observation.startsWith('I think I can also see') ||
-              observation.startsWith('A few reads were too unsure');
-      lines.add(_ChatLine(text: observation, isConfirmation: isConfirmation));
+      // v0.8.17: the flag rides the plan's parallel list now; the fixed
+      // opening-word match stays as a fallback for plans without it.
+      final bool isConfirmation = i < plan.observationConfirmations.length
+          ? plan.observationConfirmations[i]
+          : plan.observations[i].startsWith('I think I can also see') ||
+              plan.observations[i].startsWith('A few reads were too unsure');
+      lines.add(_ChatLine(
+          text: plan.observations[i], isConfirmation: isConfirmation));
     }
     for (int i = 0; i < plan.suggestions.length; i++) {
       final _Suggestion suggestion = plan.suggestions[i];
@@ -44,7 +48,10 @@ extension _ScanChatFlow on _ScanFlowScreenState {
       if (i < plan.suggestions.length - 1) {
         // v0.8.16 (Meiosis TC-20): interjections are the coach's own
         // asides - they render as coach bubbles, not user bubbles.
-        lines.add(_ChatLine(text: _interjections[i % _interjections.length]));
+        // v0.8.17: the asides rotate from the no-repeat pool, so two
+        // consecutive coach messages never reuse the same aside.
+        lines.add(_ChatLine(
+            text: _scanVocab.asides.next(kCoachInterjections)));
       }
     }
     lines.add(
@@ -70,13 +77,16 @@ extension _ScanChatFlow on _ScanFlowScreenState {
     final _ScanPlan plan = _plan;
     final String where = plan.hasSetting ? plan.setting : 'this space';
     final int count = plan.suggestions.length;
+    // v0.8.17: the intro opens with a rotating opener from the scan's
+    // vocabulary bundle, so consecutive scans never start alike.
+    final String opener = _scanVocab.openers.next(kCoachOpeners);
     if (plan.hasTidiness) {
-      return 'Looking at the $where, I would call it ${_titleCase(plan.tidiness)}. '
-          'Here are $count concrete actions, each one something you can do with '
-          'your hands right now.';
+      return '$opener Looking at the $where, I would call it '
+          '${_titleCase(plan.tidiness)}. Here are $count concrete actions, '
+          'each one something you can do with your hands right now.';
     }
-    return 'Looking at the $where, here is what stands out and the $count '
-        'concrete actions for it.';
+    return '$opener Looking at the $where, here is what I would tackle '
+        'and the $count concrete actions for it.';
   }
 
   /// v0.6.9: the Next control is rate limited so rapid tapping cannot

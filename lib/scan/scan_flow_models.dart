@@ -104,21 +104,14 @@ class _PhotoItem {
 /// Maximum photos per scan: the main shot plus five extra angles.
 const int _maxPhotos = 6;
 
-/// Interjections the coach drops between suggestions.
-const List<String> _interjections = <String>[
-  'Makes sense.',
-  'That one I can do right now.',
-  'Good tip.',
-  'Noted, next one.',
-  'Okay, next.',
-];
-
 /// v0.8.17: the per-scan vocabulary bundle - one no-repeat picker per
 /// wording role, all seeded from one scan seed so one conversation stays
 /// coherent while different scans read differently.
 class _CoachVocab {
   _CoachVocab(this.seed)
-      : leads = VocabPicker(seed: seed + 2),
+      : openers = VocabPicker(seed: seed),
+        asides = VocabPicker(seed: seed + 1),
+        leads = VocabPicker(seed: seed + 2),
         verbs = VocabPicker(seed: seed + 3),
         asks = VocabPicker(seed: seed + 5),
         gates = VocabPicker(seed: seed + 6);
@@ -126,6 +119,8 @@ class _CoachVocab {
   /// The scan seed this bundle was built from.
   final int seed;
 
+  final VocabPicker openers;
+  final VocabPicker asides;
   final VocabPicker leads;
   final VocabPicker verbs;
   final VocabPicker asks;

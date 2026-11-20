@@ -16,6 +16,11 @@ extension _ScanAnalyze on _ScanFlowScreenState {
     if (_photos.isEmpty) return;
     final int runId = ++_runId;
 
+    // v0.8.17: seed the scan's vocabulary bundle so every conversation
+    // rotates its own wording (no-repeat within each pool).
+    _scanVocab = _CoachVocab(
+        DateTime.now().microsecondsSinceEpoch & 0x7fffffff);
+
     _setUiState(() {
       _analyzing = true;
       _awaitingRecognition = true;
