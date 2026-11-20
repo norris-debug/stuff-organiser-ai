@@ -91,8 +91,13 @@ extension _ScanChatFlow on _ScanFlowScreenState {
 
   /// v0.6.9: the Next control is rate limited so rapid tapping cannot
   /// outrun the coach while the plan is still being revealed.
+  /// v0.8.18: the timestamp reads package:clock's clock.now() instead of
+  /// DateTime.now() - inside widget tests fake time advances clock.now()
+  /// with the pumps, so a pump-driven reveal loop can clear the cooldown,
+  /// while production behavior is unchanged (clock.now() is wall time
+  /// outside the test zone).
   void _revealNext() {
-    final DateTime now = DateTime.now();
+    final DateTime now = clock.now();
     if (now.difference(_lastNextAt) < const Duration(milliseconds: 700)) {
       return;
     }
