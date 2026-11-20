@@ -8,15 +8,21 @@ part of 'scan_flow.dart';
 ///   pinning the order ("photo 1/N, 2/N, ...");
 /// - the venue and the typed notes ride in the body;
 /// - the scan ID names the subject line;
-/// - APK shares the package natively; web uses the browser share sheet
-///   where it supports files and falls back to a copied body where it
-///   does not (honest about that edge);
-/// - the flow ends on the "package sent" labeling - renders and the
-///   recognized item list arrive by email, so nothing spins.
+/// - APK hands the package to the native share sheet with the photos
+///   attached;
+/// - web opens a real email compose (mailto:) with the subject and body
+///   prefilled - browsers cannot attach files to a share intent, so the
+///   photos are attached by the user in upload order, and a clipboard
+///   copy is the fallback when the compose cannot open;
+/// - the flow ends on honest labeling - renders and the recognized item
+///   list arrive by email, so nothing spins.
 ///
 /// The recipient is intentionally NOT hardcoded: the user addresses the
 /// email themselves (the repo is public - no private address belongs in
 /// source). The coach's receive mailbox watches for the subject pattern.
+/// v0.8.18: the web fallback now opens an actual compose - the shipped
+/// clipboard-only fallback sent nothing unless the user hand-wrote the
+/// whole email, which is the failure the steward's test exposed.
 
 /// The attached photos as share files, named in upload order.
 List<XFile> _forwardFiles(List<Uint8List> bytes, List<String> mimes) {
@@ -59,8 +65,8 @@ String forwardBody({
 
 /// v0.8.17: launches the forward package for one scan. Public so the
 /// awaiting-bubble UI can call it directly. Returns the honest labeling
-/// line the chat shows once the share intent is handed off - the flow
-/// ends there, no spinner, per the locked Lane 2 contract.
+/// line the chat shows once the package is handed off - the flow ends
+/// there, no spinner, per the locked Lane 2 contract.
 Future<String> launchForwardPackage({
   required List<Uint8List> photoBytes,
   required List<String> photoMimes,
@@ -75,20 +81,25 @@ Future<String> launchForwardPackage({
     notes: notes,
     scanId: scanId,
   );
-  final List<XFile> files = _forwardFiles(photoBytes, photoMimes);
   if (kIsWeb) {
-    // Web: the browser share sheet when it supports files; a copied
-    // body where it does not, so the scan still reaches the lane.
+    // Web: open a real email compose with the package prefilled. The
+    // photos ride by hand (browsers cannot attach files for us), so the
+    // labeling says exactly that.
+    final String mailto = 'mailto:?subject=${Uri.encodeComponent(subject)}'
+        '&body=${Uri.encodeComponent(body)}';
     try {
-      await Share.shareXFiles(files, subject: subject, text: body);
+      openMailCompose(Uri.parse(mailto));
+      return "Email compose opened - attach the photos in upload order "
+          "(photo 1 first), add the coach's address, and send. Renders and "
+          "the recognized item list arrive by email.";
     } catch (_) {
       await Clipboard.setData(ClipboardData(text: body));
-      return 'This browser could not attach the photos - the package body is '
-          'copied. Paste it into an email to the coach and attach the photos '
-          'in upload order (photo 1 first).';
+      return "This browser could not open an email compose - the package "
+          "body is copied. Paste it into an email to the coach and attach "
+          "the photos in upload order (photo 1 first).";
     }
-  } else {
-    await Share.shareXFiles(files, subject: subject, text: body);
   }
+  final List<XFile> files = _forwardFiles(photoBytes, photoMimes);
+  await Share.shareXFiles(files, subject: subject, text: body);
   return 'Package sent - renders and the recognized item list arrive by email.';
 }
