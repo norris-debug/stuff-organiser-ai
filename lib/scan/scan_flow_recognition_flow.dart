@@ -7,8 +7,15 @@ part of 'scan_flow.dart';
 /// v0.8.5 pasted ONE list for the whole scan, so every angle after the
 /// first went unread - the app appeared to consider only the first
 /// uploaded image. Now each uploaded photo gets its own paste step,
-/// matching the lane's per-image reads and the one-slot-per-angle gallery. The dialog also tracks the visual viewport, so on iOS Safari
+/// matching the lane's per-image reads and the one-slot-per-angle render
+/// gallery. The dialog also tracks the visual viewport, so on iOS Safari
 /// it jumps above the keyboard and the input box shrinks while typing.
+///
+/// v0.8.23: the paste dialog anchors topCenter permanently with
+/// keyboard-aware bottom padding - the field keeps its full 8-line
+/// height and the action row stays visible while the keyboard is up
+/// (fixes the iOS web collapse where a stray tap after focus dismissed
+/// the intake empty).
 extension _ScanRecognitionFlow on _ScanFlowScreenState {
   void _buildAwaitingChat() {
     final int count = _photos.length;
@@ -79,16 +86,16 @@ extension _ScanRecognitionFlow on _ScanFlowScreenState {
     _buildChatLines();
   }
 
-  /// One keyboard-aware paste dialog. Returns null when canceled; a
+  /// One keyboard-aware paste dialog. Returns null when cancelled; a
   /// skipped angle returns an empty list.
   ///
   /// v0.8.18 (run #175): the dialog is a real StatefulWidget now. The
   /// old inline version disposed its TextEditingController the moment
-  /// showResolve resolved - while the exit transition was still animating
-  /// the TextField - so the pop animation rebuilt against a dead
-  /// controller, tore the frame mid-build, and the intake's
+  /// showDialog resolved - while the exit transition was still animating
+  /// the TextField - so the pop animation rebuilt the field against a
+  /// dead controller, tore the frame mid-build, and the intake's
   /// follow-up state updates never landed. Ownership inside the dialog
-  /// fixes the timing: its dispose runs only after the route has
+  /// State fixes the timing: its dispose runs only after the route has
   /// fully left the tree.
   Future<_AnglePaste?> _pasteListDialog(String title) async {
     final String? raw = await showDialog<String>(
@@ -106,10 +113,8 @@ extension _ScanRecognitionFlow on _ScanFlowScreenState {
 /// Keyboard-aware paste dialog (v0.8.18, run #175). Owns its controller
 /// and keyboard-inset notifier so both are disposed only after the exit
 /// transition has finished - see _pasteListDialog for the fault history.
-/// Ownership inside the dialog fixes the timing: its dispose runs only after the route has
-/// fully left the tree.
-/// Cancel pops null, Skip pops the empty string, Coach-from-this
-/// pops the typed list.
+/// Cancel pops null, Skip pops the empty string, Coach-from-this pops
+/// the typed list.
 class _RecognitionPasteDialog extends StatefulWidget {
   const _RecognitionPasteDialog({required this.title});
 
@@ -145,20 +150,19 @@ class _RecognitionPasteDialogState extends State<_RecognitionPasteDialog> {
     return ValueListenableBuilder<double>(
       valueListenable: _keyboardInset,
       builder: (BuildContext context, double inset, _) {
-        // v0.8.23: fixed iOS paste-box collapse. The old code used
-        // inset > 0 to detect keyboard, which fired on any tiny inset
-        // change and immediately: (a) shrank the field from 8 to 4
-        // lines, (b) hid ALL action buttons, (c) slammed the dialog
-        // to topCenter. Now: threshold is 48px (real keyboard is
-        // ~300+px on iOS), maxLines stays at 8, actions never hide,
-        // and insetPadding pushes the dialog up when keyboard is up.
-        final bool keyboardUp = inset > 48;
+        final bool keyboardUp = inset > kKeyboardInsetMin;
         return AlertDialog(
           scrollable: true,
-          alignment: keyboardUp ? Alignment.topCenter : Alignment.center,
-          insetPadding: keyboardUp
-              ? EdgeInsets.only(bottom: inset + 24)
-              : const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+          // v0.8.23: one stable topCenter anchor - the old build jumped
+          // center -> topCenter, shrank the field 8 -> 4 lines and hid
+          // the actions in the same focus rebuild, so the next stray
+          // tap landed on the dismiss barrier and closed the intake
+          // empty on iOS Safari.
+          alignment: Alignment.topCenter,
+          insetPadding: EdgeInsets.fromLTRB(
+            40, 40, 40,
+            keyboardUp ? inset + 24 : 40,
+          ),
           title: Text(widget.title),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -182,6 +186,8 @@ class _RecognitionPasteDialogState extends State<_RecognitionPasteDialog> {
               ),
             ],
           ),
+          // v0.8.23: the actions never hide - the keyboard-aware bottom
+          // padding keeps the dialog clear of the keyboard instead.
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(null),
@@ -202,6 +208,11 @@ class _RecognitionPasteDialogState extends State<_RecognitionPasteDialog> {
     );
   }
 }
+
+/// v0.8.23: insets at or under this read as no keyboard - spurious tiny
+/// insets on some iOS Safari focus frames must not trigger the
+/// keyboard-aware layout.
+const double kKeyboardInsetMin = 48.0;
 
 /// One angle's pasted recognition result (empty when the angle was skipped).
 class _AnglePaste {
