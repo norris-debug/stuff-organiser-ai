@@ -51,8 +51,6 @@ void main() {
   testWidgets(
       'render-level Next host: disabled state serialized on ONE button node',
       (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SoaiSemanticsButton(
@@ -79,7 +77,8 @@ void main() {
     // SemanticsController has no getSemantics either. The documented
     // chain is tester.semantics.find(...) -> SemanticsNode ->
     // getSemanticsData(); tester.semantics throws unless semantics are
-    // enabled, which ensureSemantics() above guarantees.
+    // enabled, which testWidgets guarantees by default (semanticsEnabled
+    // defaults to true, and the framework's handle is auto-disposed).
     final SemanticsData data =
         tester.semantics
             .find(find.byType(SoaiSemanticsButton))
@@ -95,8 +94,6 @@ void main() {
   testWidgets(
       'render-level Next host: enabled state and tap action while enabled',
       (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SoaiSemanticsButton(
