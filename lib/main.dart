@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +18,15 @@ import 'theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // v0.8.20: semantics test mode - dynamic walkthrough automation and
+  // screen-reader verification need the semantics/ARIA tree present on
+  // the CanvasKit web build, where it only comes up when an assistive
+  // technology is detected. The URL flag (or the dart-define) forces it
+  // on for the whole session.
+  if (_semanticsRequested()) {
+    unawaited(SemanticsBinding.ensureSemantics());
+  }
+
   final prefs = await SharedPreferences.getInstance();
   final firebaseReady = await _initFirebase();
 
@@ -26,6 +38,22 @@ Future<void> main() async {
   await appState.bootstrap();
 
   runApp(StuffOrganiserApp(appState: appState));
+}
+
+/// v0.8.20: semantics test mode gate. The URL flag (?semantics=1) turns
+/// the mode on for the session; CI builds can force it with
+/// --dart-define=FORCE_SEMANTICS=true. Non-web platforms have no query,
+/// so they only honor the dart-define.
+bool _semanticsRequested() {
+  if (const bool.fromEnvironment('FORCE_SEMANTICS')) {
+    return true;
+  }
+  try {
+    return Uri.base.queryParameters.containsKey('semantics');
+  } catch (_) {
+    // No query on this platform - no test mode requested.
+    return false;
+  }
 }
 
 /// Demo mode entry point: if Firebase cannot be initialised (no
