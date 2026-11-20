@@ -183,6 +183,7 @@ void main() {
     // Pick stage: venue chip + one gallery photo.
     await tester.tap(find.text('Bedroom'));
     await tester.pump();
+    debugPrint('DIAG-V bedroomMatches=${find.text('Bedroom').evaluate().length}');
     await tester.tap(find.text('Gallery'));
     await tester.pump();
     expect(find.byType(Image), findsWidgets);
@@ -222,13 +223,26 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
+    // TEMP diagnostics (run #176 triage) - remove once the fix lands.
+    debugPrint('DIAG-A dialogTextField=${find.byType(TextField).evaluate().length}');
+    debugPrint('DIAG-A noLabels=${find.textContaining('No object labels').evaluate().length}');
+    debugPrint('DIAG-A scan=${find.text('Scan your space').evaluate().length} chat=${find.text('Coach chat').evaluate().length} result=${find.text('Your tidy plan').evaluate().length}');
+    debugPrint('DIAG-A next=${find.widgetWithText(OutlinedButton, 'Next').evaluate().length} intro=${find.textContaining('Looking at').evaluate().length}');
+
     // Reveal the whole coach conversation. The Next control is rate
     // limited on real wall-clock time, so wait it out between taps.
+    int revealGuard = 0;
     while (find.widgetWithText(OutlinedButton, 'Next').evaluate().isNotEmpty) {
+      revealGuard++;
+      if (revealGuard > 40) {
+        debugPrint('DIAG reveal-guard hit at 40 iterations - breaking');
+        break;
+      }
       await tester.tap(find.widgetWithText(OutlinedButton, 'Next'));
       await tester.pump();
       await Future<void>.delayed(const Duration(milliseconds: 750));
     }
+    debugPrint('DIAG-C iterations=$revealGuard nextAfterLoop=${find.widgetWithText(OutlinedButton, 'Next').evaluate().length}');
 
     // Finishing the reveal auto-flows into the result page, which runs
     // the scan's leave-behinds: plan save, venue auto-add, item landing.
@@ -237,6 +251,9 @@ void main() {
     // side-effect chain with fixed pumps instead of settling.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
+
+    debugPrint('DIAG-B scan=${find.text('Scan your space').evaluate().length} chat=${find.text('Coach chat').evaluate().length} result=${find.text('Your tidy plan').evaluate().length}');
+    debugPrint('DIAG-B spaces=${state.spaces.length} items=${state.items.length} rawLen=${(prefs.getString('tidy_plan_todo_v1') ?? '').length}');
 
     // Venue auto-add (TC-24) - exactly one space, reused on rescans by
     // the duplicate guard.
