@@ -27,6 +27,7 @@ extension _ScanRecognitionFlow on _ScanFlowScreenState {
       const _ChatLine(
         text: 'Paste the recognized object list for each photo and I will '
             'coach you from what is actually in the room.',
+        isPasteAction: true,
       ),
     ];
     _setUiState(() {
