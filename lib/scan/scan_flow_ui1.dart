@@ -126,10 +126,18 @@ extension _ScanPickUi on _ScanFlowScreenState {
               ),
             ),
             const SizedBox(width: 10),
-            FilledButton.icon(
-              onPressed: (_analyzing || !hasPhotos) ? null : _confirmAndAnalyse,
-              icon: const Icon(Icons.task_alt),
-              label: Text(_analyzing ? 'Analysing...' : 'Next'),
+            // v0.8.24 (Meiosis R4): the disabled Next must expose its
+            // enabled state to the semantics tree - screen readers and
+            // automation read the distinction at zero photos / while
+            // analysing.
+            Semantics(
+              enabled: !_analyzing && hasPhotos,
+              child: FilledButton.icon(
+                onPressed:
+                    (_analyzing || !hasPhotos) ? null : _confirmAndAnalyse,
+                icon: const Icon(Icons.task_alt),
+                label: Text(_analyzing ? 'Analysing...' : 'Next'),
+              ),
             ),
           ],
         ),
