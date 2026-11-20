@@ -2,6 +2,11 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.18+38 - 2026-11-20
+
+- R2-01 (scan-save race, Firebase mode): the scan's leave-behind save now reads a snapshot of the plan, the recognized list and the venue taken before its first await - a flow reset racing the side effects can no longer turn the save into a silent no-op. Demo mode's window was near-zero; this hardens Firebase mode before that switch flips.
+- Functional test gate (Meiosis task-5): widget_test.dart gets real coverage - the dashboard badge derives from package metadata, the Plan tab honors the tidy-plan storage contract (stored parts render, first runs start empty, corrupt stores show the honest banner), the duplicate-space guard reuses case-insensitive matches, and a full scan-flow integration test drives pick -> gallery photos -> pasted recognition -> coach reveal -> result to verify the plan auto-save, the venue auto-add to "Your spaces", and that confirmed/verify objects land as unpacked items while flagged reads stay out.
+
 ## v0.8.17+37 - 2026-11-20
 
 - Coach vocabulary variety (steward directive): the plan drafter, the bucket suggestions and the chat assembly now rotate wording through a per-scan seeded, no-repeat vocabulary bundle - rotating openers, varied lead-ins, confirmation questions, discard phrasings and Dan/Sha/Ri phrasings - so two scans never read alike while one conversation stays coherent. The Danshari method is untouched; only the wording rotates.
