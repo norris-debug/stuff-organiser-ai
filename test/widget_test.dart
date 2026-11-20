@@ -1,12 +1,9 @@
-// Functional test gate (v0.8.18, Meiosis task-5): real coverage for the
-// surfaces the QA lane tracks - the dashboard badge derives from package
-// metadata, the Plan tab honors the tidy-plan storage contract, the
-// duplicate-space guard reuses case-insensitive matches, and the scan
-// flow's pasted recognition intake saves the plan, auto-adds the venue to
-// "Your spaces" and lands confirmed/verify objects as unpacked items while
-// flagged reads stay out.
+// Functional test gate (v0.8.18, Meiosis task-5): the dashboard badge, the
+// Plan tab storage contract, the duplicate-space guard, and the scan flow's
+// pasted-recognition intake end to end.
 import 'dart:convert';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
@@ -33,7 +30,7 @@ class _FakeImagePicker extends ImagePickerPlatform {
   final List<XFile> files;
 
   @override
-  Future<List<XFile>> getMultiImage({
+  Future<List<XFile>?> getMultiImage({
     double? maxWidth,
     double? maxHeight,
     int? imageQuality,
@@ -125,8 +122,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bedroom'), findsOneWidget);
-    // Parts start collapsed - the task lines do not exist in the tree
-    // until the part is opened, so tap the header first.
+    // Parts start collapsed - tap the header before asserting task texts.
     await tester.tap(find.text('Bedroom'));
     await tester.pump();
     expect(find.text('Fold the red scarf into one stack'), findsOneWidget);
@@ -188,8 +184,7 @@ void main() {
     expect(find.byType(Image), findsWidgets);
 
     // Next runs the (fake-timed) analysis and opens the waiting chat.
-    // The pick stage is a lazy ListView and on the default test viewport
-    // the Next button sits below the fold - scroll it into view first.
+    // The pick Next sits below the fold on the test viewport (run #174).
     await tester.scrollUntilVisible(
       find.text('Next'),
       160,
@@ -202,15 +197,11 @@ void main() {
     await tester.pump();
 
     expect(find.text('Paste recognized list'), findsOneWidget);
-    // The waiting bubble is a lazy ListView too: the paste action can sit
-    // outside the visible viewport while still built inside the cache
-    // extent, and the tap at the reported center then lands on the scroll
-    // surface instead of the button (run #174). Bring it on-screen first.
+    // The paste action can sit outside the visible viewport (run #174).
     await tester.ensureVisible(find.text('Paste recognized list'));
     await tester.pump();
     await tester.tap(find.text('Paste recognized list'));
-    // Mascots in the chat bubbles behind the dialog repeat forever, so
-    // pumpAndSettle can never settle - pump the dialog open instead.
+    // Mascots behind the dialog repeat forever - pump fixed frames.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -222,40 +213,44 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    // Reveal the whole coach conversation. Two details make this work:
-    // (1) find.text('Next'), not find.widgetWithText(OutlinedButton, ...)
-    // - the shipped Next is an OutlinedButton.icon, which builds a
-    // private OutlinedButton subclass that exact-type finders never see;
-    // (2) the Next cooldown reads package:clock, whose fake clock does
-    // advance inside testWidgets, so the 750ms fake delay clears the
-    // 700ms cooldown between taps.
+    // find.text('Next') because the shipped Next is an OutlinedButton.icon
+    // (exact-type finders never see it), and the Next cooldown reads
+    // clock.now() so fake time advances it between taps.
     int revealGuard = 0;
+    debugPrint(
+        'DIAG loop-enter fake=${clock.now()} next=${find.text('Next').evaluate().length}');
     while (find.text('Next').evaluate().isNotEmpty) {
       revealGuard++;
       if (revealGuard > 40) {
         debugPrint('DIAG reveal-guard hit at 40 iterations - breaking');
         break;
       }
+      debugPrint(
+          'DIAG iter=$revealGuard fake=${clock.now()} next=${find.text('Next').evaluate().length}');
       await tester.tap(find.text('Next'));
       await tester.pump();
-      await Future<void>.delayed(const Duration(milliseconds: 750));
+      // pump(750ms) advances fake time through the 700ms cooldown without
+      // relying on fake-timer flushing - the 10-minute timeout in run #181
+      // hung while awaiting a plain Future.delayed inside the loop.
+      await tester.pump(const Duration(milliseconds: 750));
     }
+    debugPrint(
+        'DIAG loop-exit iters=$revealGuard fake=${clock.now()} chat=${find.text('Coach chat').evaluate().length} plan=${find.text('Your tidy plan').evaluate().length}');
 
-    // Finishing the reveal auto-flows into the result page, which runs
-    // the scan's leave-behinds: plan save, venue auto-add, item landing.
+    // Finishing the reveal auto-flows into the result page, which runs the
+    // scan's leave-behinds: plan save, venue auto-add, item landing.
     await tester.pump(const Duration(milliseconds: 1000));
-    // The result page also carries a repeating mascot - flush the
-    // side-effect chain with fixed pumps instead of settling.
+    // The result page also carries a repeating mascot - fixed pumps only.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    // Venue auto-add (TC-24) - exactly one space, reused on rescans by
-    // the duplicate guard.
+    // Venue auto-add (TC-24) - exactly one space, reused on rescans by the
+    // duplicate guard.
     expect(state.spaces, hasLength(1));
     expect(state.spaces.single.name, 'Bedroom');
 
-    // Confirmed + verify objects landed as unpacked items; the flagged
-    // read stayed out by design.
+    // Confirmed + verify objects landed as unpacked items; the flagged read
+    // stayed out by design.
     final Set<String> names = state.items.map((item) => item.name).toSet();
     expect(names, containsAll(<String>['loose papers', 'red scarf']));
     expect(names, isNot(contains('mystery gadget')));
