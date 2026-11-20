@@ -218,6 +218,12 @@ class _PlanScreenState extends State<PlanScreen> {
     add?.dispose();
   }
 
+  /// v0.8.16: setState hook for the views part file - extensions cannot
+  /// call the protected member directly, so they call this instead.
+  void replan(VoidCallback fn) {
+    setState(fn);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
