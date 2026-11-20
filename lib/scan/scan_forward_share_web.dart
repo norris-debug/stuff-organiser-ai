@@ -30,15 +30,19 @@ Future<bool> sharePhotosViaWebShare({
 }) async {
   try {
     if (!webShareFilesSupported()) return false;
+    // Raw JS construction: dart:html's File wrapper does not expose a
+    // 'type' named parameter, so build the exact platform shape here -
+    // new File([blob], name, {type}) - via js_util instead.
+    final dynamic fileCtor = js.getProperty(html.window, 'File');
     final List<dynamic> files = <dynamic>[];
     for (int i = 0; i < bytes.length && i < mimes.length; i++) {
       final String ext = mimes[i].contains('png') ? 'png' : 'jpg';
       final html.Blob blob = html.Blob(<Object>[bytes[i]], mimes[i]);
-      files.add(html.File(
-        <Object>[blob],
+      files.add(js.callConstructor(fileCtor, <dynamic>[
+        <dynamic>[blob],
         'photo-${i + 1}.$ext',
-        type: mimes[i],
-      ));
+        js.jsify(<String, dynamic>{'type': mimes[i]}),
+      ]));
     }
     final Object payload = js.jsify(<String, dynamic>{
       'title': subject,
