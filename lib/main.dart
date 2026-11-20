@@ -8,6 +8,7 @@ import 'package:flutter/semantics.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'debug/qa_tools.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/auth_service.dart';
@@ -25,6 +26,9 @@ Future<void> main() async {
   // on for the whole session.
   if (_semanticsRequested()) {
     SemanticsBinding.instance.ensureSemantics();
+    // v0.8.25: the QA sample-photos affordance rides the same test-mode
+    // gate - invisible to normal users, visible to automation.
+    soaiDebugMode = true;
   }
 
   final prefs = await SharedPreferences.getInstance();
