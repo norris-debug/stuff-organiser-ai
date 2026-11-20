@@ -63,6 +63,10 @@ extension _ScanRecognitionFlow on _ScanFlowScreenState {
     _setUiState(() {
       _plan = _recognitionPlan(merged, _notesController.text.trim())
           .withVenue(_scanVenue);
+      // v0.8.16: the merged list is kept so the scan's leave-behinds
+      // can turn the confirmed and verify objects into unpacked items
+      // on the venue's page.
+      _recognized = merged;
       _awaitingRecognition = false;
     });
     _buildChatLines();
