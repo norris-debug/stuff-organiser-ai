@@ -6,10 +6,24 @@ import '../models/space.dart';
 import '../state/app_state.dart';
 
 /// Screen 4: one space, drag-and-drop item grid.
-class SpaceDetailScreen extends StatelessWidget {
+///
+/// v0.8.16 redesign (Herrick's directive): the venue page lists the
+/// room's items straight from the scan, tap = select, and a bottom
+/// "Finish organizing" button clears the selection. The per-item
+/// three-dots delete menu is gone, and the "Drop in [venue]" chips now
+/// open that venue's page on tap (they stay drag targets for
+/// drag-and-drop moves).
+class SpaceDetailScreen extends StatefulWidget {
   const SpaceDetailScreen({super.key, required this.spaceId});
 
   final String spaceId;
+
+  @override
+  State<SpaceDetailScreen> createState() => _SpaceDetailScreenState();
+}
+
+class _SpaceDetailScreenState extends State<SpaceDetailScreen> {
+  final Set<String> _selected = <String>{};
 
   void _dropOnItem(AppState state, Item dragged, Item target) {
     if (dragged.id == target.id) return;
@@ -18,6 +32,36 @@ class SpaceDetailScreen extends StatelessWidget {
     } else {
       state.moveItemToSpace(dragged.id, target.spaceId, beforeItemId: target.id);
     }
+  }
+
+  void _toggleSelected(String itemId) {
+    setState(() {
+      if (!_selected.remove(itemId)) {
+        _selected.add(itemId);
+      }
+    });
+  }
+
+  /// v0.8.16: the selected items are cleared from the space - the
+  /// three-dots delete menu is replaced by multi-select plus this one
+  /// bottom button.
+  Future<void> _finishOrganizing(AppState state) async {
+    final List<String> ids = _selected.toList();
+    if (ids.isEmpty) return;
+    for (final String id in ids) {
+      await state.deleteItem(id);
+    }
+    if (!mounted) return;
+    setState(() {
+      _selected.clear();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Removed ${ids.length} item${ids.length == 1 ? '' : 's'} - nice work.',
+        ),
+      ),
+    );
   }
 
   /// v0.3: changes the planned action of a paper pile after creation.
@@ -62,7 +106,7 @@ class SpaceDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppState state = context.watch<AppState>();
     final ThemeData theme = Theme.of(context);
-    final Space? space = state.spaceById(spaceId);
+    final Space? space = state.spaceById(widget.spaceId);
 
     if (space == null) {
       return Scaffold(
@@ -71,13 +115,16 @@ class SpaceDetailScreen extends StatelessWidget {
       );
     }
 
+    // Selections pointing at deleted items cannot linger.
+    _selected.retainAll(state.items.map((Item item) => item.id));
+
     final List<Item> spaceItems = state.items
-        .where((Item item) => item.spaceId == spaceId)
+        .where((Item item) => item.spaceId == widget.spaceId)
         .toList()
       ..sort((Item a, Item b) => a.order.compareTo(b.order));
 
     final List<Space> otherSpaces = state.spaces
-        .where((Space s) => s.id != spaceId)
+        .where((Space s) => s.id != widget.spaceId)
         .toList();
 
     return Scaffold(
@@ -110,11 +157,11 @@ class SpaceDetailScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       '${spaceItems.length} item${spaceItems.length == 1 ? '' : 's'} · '
-                      '${state.looseInSpace(space.id)} loose',
+                      '${state.looseInSpace(widget.spaceId)} loose',
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
-                  const Text('Tap = put away · Hold + drag = move', style: TextStyle(fontSize: 11)),
+                  const Text('Tap = select · Hold + drag = move', style: TextStyle(fontSize: 11)),
                 ],
               ),
             ),
@@ -151,9 +198,24 @@ class SpaceDetailScreen extends StatelessWidget {
                                     children: <Widget>[
                                       Text(target.emoji),
                                       const SizedBox(width: 8),
-                                      Text(
-                                        'Drop in ${target.name}',
-                                        style: theme.textTheme.bodySmall,
+                                      // v0.8.16: the chip opens the target
+                                      // venue's page on tap (it used to do
+                                      // nothing); it stays a drag target for
+                                      // drag-and-drop moves.
+                                      InkWell(
+                                        borderRadius: BorderRadius.circular(16),
+                                        onTap: () => Navigator.of(context).push(
+                                          MaterialPageRoute<void>(
+                                            builder: (_) => SpaceDetailScreen(spaceId: target.id),
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 10),
+                                          child: Text(
+                                            'Drop in ${target.name}',
+                                            style: theme.textTheme.bodySmall,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -167,10 +229,17 @@ class SpaceDetailScreen extends StatelessWidget {
             Expanded(
               child: spaceItems.isEmpty
                   ? Center(
-                      child: Text(
-                        'Nothing here yet.\nUse Quick add to log something.',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text('Nothing unpacked here yet.', style: theme.textTheme.titleSmall),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Scan this room again or use Quick add to log something.',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
                       ),
                     )
                   : GridView.builder(
@@ -186,14 +255,29 @@ class SpaceDetailScreen extends StatelessWidget {
                         final Item item = spaceItems[index];
                         return _DraggableItemTile(
                           item: item,
-                          onToggle: () => state.toggleItemStatus(item),
-                          onDelete: () => state.deleteItem(item.id),
+                          selected: _selected.contains(item.id),
+                          onToggle: () => _toggleSelected(item.id),
                           onAccept: (Item dragged) => _dropOnItem(state, dragged, item),
                           onEditPaperAction: () => _editPaperAction(context, state, item),
                         );
                       },
                     ),
             ),
+            if (_selected.isNotEmpty)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () => _finishOrganizing(state),
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: Text('Finish organizing (${_selected.length})'),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -230,15 +314,15 @@ class SpaceDetailScreen extends StatelessWidget {
 class _DraggableItemTile extends StatelessWidget {
   const _DraggableItemTile({
     required this.item,
+    required this.selected,
     required this.onToggle,
-    required this.onDelete,
     required this.onAccept,
     required this.onEditPaperAction,
   });
 
   final Item item;
+  final bool selected;
   final VoidCallback onToggle;
-  final VoidCallback onDelete;
   final ValueChanged<Item> onAccept;
   final VoidCallback onEditPaperAction;
 
@@ -246,8 +330,8 @@ class _DraggableItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget tile = _ItemTile(
       item: item,
+      selected: selected,
       onToggle: onToggle,
-      onDelete: onDelete,
       onEditPaperAction: onEditPaperAction,
     );
     return LongPressDraggable<Item>(
@@ -259,8 +343,8 @@ class _DraggableItemTile extends StatelessWidget {
           height: 150,
           child: _ItemTile(
             item: item,
+            selected: false,
             onToggle: () {},
-            onDelete: () {},
             onEditPaperAction: () {},
           ),
         ),
@@ -284,14 +368,14 @@ class _DraggableItemTile extends StatelessWidget {
 class _ItemTile extends StatelessWidget {
   const _ItemTile({
     required this.item,
+    required this.selected,
     required this.onToggle,
-    required this.onDelete,
     required this.onEditPaperAction,
   });
 
   final Item item;
+  final bool selected;
   final VoidCallback onToggle;
-  final VoidCallback onDelete;
   final VoidCallback onEditPaperAction;
 
   @override
@@ -300,10 +384,17 @@ class _ItemTile extends StatelessWidget {
     final bool organized = item.status == ItemStatus.organized;
 
     return Material(
-      color: organized ? theme.colorScheme.secondaryContainer : theme.colorScheme.surface,
+      color: selected
+          ? theme.colorScheme.primaryContainer
+          : organized
+              ? theme.colorScheme.secondaryContainer
+              : theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        side: BorderSide(
+          color: selected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
+          width: selected ? 2 : 1,
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -317,20 +408,10 @@ class _ItemTile extends StatelessWidget {
                 children: <Widget>[
                   Text(item.isPaper ? '📄' : '📦', style: const TextStyle(fontSize: 20)),
                   const Spacer(),
-                  if (organized)
-                    Icon(Icons.check_circle, size: 18, color: theme.colorScheme.primary),
-                  PopupMenuButton<String>(
-                    padding: EdgeInsets.zero,
-                    iconSize: 18,
-                    constraints: const BoxConstraints(),
-                    onSelected: (String value) {
-                      if (value == 'delete') onDelete();
-                    },
-                    itemBuilder: (BuildContext context) =>
-                        const <PopupMenuEntry<String>>[
-                      PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
-                    ],
-                  ),
+                  if (selected)
+                    Icon(Icons.check_circle, size: 18, color: theme.colorScheme.primary)
+                  else if (organized)
+                    Icon(Icons.check_circle_outline, size: 18, color: theme.colorScheme.outline),
                 ],
               ),
               const Spacer(),
