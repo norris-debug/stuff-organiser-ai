@@ -1,8 +1,11 @@
 part of 'app_state.dart';
 
 /// The item mutations of AppState, split into a part file so every file
-/// stays push- and verify-sized. Behavior is unchanged except where noted.
-extension _AppStateItemOps on AppState {
+/// stays push- and verify-sized. Declared as a public extension so every
+/// importer of app_state.dart reaches these members; the notifyListeners
+/// calls route through AppState.rebroadcast() because extensions cannot
+/// touch protected members.
+extension AppStateItemOps on AppState {
   /// Adds an item and persists it.
   ///
   /// The quantity is clamped to at least one and paper items always receive
@@ -31,7 +34,7 @@ extension _AppStateItemOps on AppState {
     );
 
     items = <Item>[...items, item];
-    notifyListeners();
+    rebroadcast();
     await dataService.saveItem(uid, item);
     return item;
   }
@@ -53,12 +56,12 @@ extension _AppStateItemOps on AppState {
   /// [name]. Returns `null` when nothing matches so callers can offer a
   /// merge instead of silently creating a second, identical entry.
   Item? findDuplicate(String name, String? spaceId) {
-    final String normalized = normalizeItemName(name);
+    final String normalized = AppState.normalizeItemName(name);
     if (normalized.isEmpty) return null;
     final String targetSpaceId = spaceId ?? '';
     for (final Item item in items) {
       if (item.spaceId != targetSpaceId) continue;
-      if (normalizeItemName(item.name) == normalized) return item;
+      if (AppState.normalizeItemName(item.name) == normalized) return item;
     }
     return null;
   }
@@ -73,7 +76,7 @@ extension _AppStateItemOps on AppState {
     final int delta = addQuantity < 1 ? 1 : addQuantity;
     final Item updated = current.copyWith(quantity: current.quantity + delta);
     items = items.map((Item i) => i.id == updated.id ? updated : i).toList();
-    notifyListeners();
+    rebroadcast();
     await dataService.saveItem(uid, updated);
     return updated;
   }
@@ -85,7 +88,7 @@ extension _AppStateItemOps on AppState {
     if (item.paperAction == action) return;
     final Item updated = item.copyWith(paperAction: action);
     items = items.map((Item i) => i.id == updated.id ? updated : i).toList();
-    notifyListeners();
+    rebroadcast();
     await dataService.saveItem(uid, updated);
   }
 
@@ -98,14 +101,14 @@ extension _AppStateItemOps on AppState {
     if (next == ItemStatus.organized) {
       celebrationTick++;
     }
-    notifyListeners();
+    rebroadcast();
     await dataService.saveItem(uid, updated);
   }
 
   /// Deletes an item.
   Future<void> deleteItem(String id) async {
     items = items.where((Item i) => i.id != id).toList();
-    notifyListeners();
+    rebroadcast();
     await dataService.deleteItem(uid, id);
   }
 
@@ -187,7 +190,7 @@ extension _AppStateItemOps on AppState {
       for (final Item item in updated) item.id: item,
     };
     items = items.map((Item i) => byId[i.id] ?? i).toList();
-    notifyListeners();
+    rebroadcast();
     for (final Item item in updated) {
       await dataService.saveItem(uid, item);
     }
