@@ -150,6 +150,21 @@ void main() {
     expect(find.textContaining('Nothing here yet'), findsNothing);
   });
 
+  testWidgets('plan tab reports a valid-JSON non-List store as corrupt (R3-F1)',
+      (WidgetTester tester) async {
+    // A store that decodes but is not a list is corruption on the Plan
+    // side - the cast must throw into the honest banner, never render.
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'tidy_plan_todo_v1': '{"a":1}',
+    });
+
+    await tester.pumpWidget(_host(const PlanScreen()));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('could not be read'), findsOneWidget);
+    expect(find.textContaining('Nothing here yet'), findsNothing);
+  });
+
   testWidgets(
       'scan flow: pasted recognition saves the plan, adds the venue and lands items',
       (WidgetTester tester) async {
@@ -256,5 +271,84 @@ void main() {
     expect(part['name'], 'Bedroom');
     final List<dynamic> tasks = part['tasks'] as List<dynamic>;
     expect(tasks, hasLength(2));
+  });
+
+  testWidgets(
+      'scan flow: a valid-JSON non-List plan store is never silently overwritten (R3-F1)',
+      (WidgetTester tester) async {
+    // R3-F1: the scan save must mirror the Plan tab's cast - a store that
+    // decodes but is not a list is corruption, so the save reports instead
+    // of overwriting. Pin: the store still holds the corrupt object after
+    // a full scan flow with a real suggestion list.
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'tidy_plan_todo_v1': '{"a":1}',
+    });
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final AppState state = _demoState(prefs);
+
+    ImagePickerPlatform.instance = _FakeImagePicker(<XFile>[
+      XFile.fromData(
+        base64Decode(_kPng1x1),
+        name: 'photo-1.jpg',
+        mimeType: 'image/jpeg',
+      ),
+    ]);
+
+    await tester.pumpWidget(_host(
+      ScanFlowScreen(
+        prefs: prefs,
+        mascot: MascotVariant.bunny,
+        pack: themePacks.first,
+        appState: state,
+      ),
+    ));
+    await tester.pump();
+
+    await tester.tap(find.text('Bedroom'));
+    await tester.pump();
+    await tester.tap(find.text('Gallery'));
+    await tester.pump();
+    await tester.scrollUntilVisible(
+      find.text('Next'),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Paste recognized list'));
+    await tester.pump();
+    await tester.tap(find.text('Paste recognized list'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.enterText(
+      find.byType(TextField),
+      'loose papers - 92%\nred scarf - 75%',
+    );
+    await tester.tap(find.text('Coach from this'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    int revealGuard = 0;
+    while (find.text('Next').evaluate().isNotEmpty) {
+      revealGuard++;
+      if (revealGuard > 40) {
+        break;
+      }
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
+    }
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // The corrupt store must survive untouched - an overwrite here would
+    // mean the save silently replaced unreadable content.
+    expect(prefs.getString('tidy_plan_todo_v1'), '{"a":1}');
   });
 }
