@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'mascot_happy_overrides.dart';
 import 'mascot_paths_1.dart';
 import 'mascot_paths_2.dart';
 import 'mascot_paths_3.dart';
@@ -71,28 +72,41 @@ Color _fillFromHex(String hex) {
 }
 
 /// Paints one traced mascot: optional pastel tile, then every traced
-/// shape scaled from the 1024 viewBox into the widget square.
+/// shape scaled from the 1024 viewBox into the widget square. With
+/// happy=true the mouth shape(s) listed in kHappyOverrides replace
+/// their base rows; every other mood keeps the shipped base list.
 void paintMascotTraced(
   Canvas canvas,
   Size size,
   String mascotName, {
   Color? pastel,
+  bool happy = false,
 }) {
-  final List<MascotShapeRow>? rows = kTracedMascots[mascotName];
-  if (rows == null || rows.isEmpty) {
+  List<MascotShapeRow> shapeRows =
+      kTracedMascots[mascotName] ?? const <MascotShapeRow>[];
+  if (shapeRows.isEmpty) {
     return;
+  }
+  final Map<int, MascotShapeRow>? overrides =
+      happy ? kHappyOverrides[mascotName] : null;
+  String cacheKey = mascotName;
+  if (overrides != null && overrides.isNotEmpty) {
+    shapeRows = <MascotShapeRow>[
+      for (int i = 0; i < shapeRows.length; i++) overrides[i] ?? shapeRows[i],
+    ];
+    cacheKey = '$mascotName#happy';
   }
   if (pastel != null) {
     canvas.drawRect(Offset.zero & size, Paint()..color = pastel);
   }
   final List<Path> paths = _kPathCache.putIfAbsent(
-    mascotName,
-    () => <Path>[for (final MascotShapeRow row in rows) _pathFromD(row.d)],
+    cacheKey,
+    () => <Path>[for (final MascotShapeRow row in shapeRows) _pathFromD(row.d)],
   );
   final List<Color> fills = _kFillCache.putIfAbsent(
-    mascotName,
+    cacheKey,
     () => <Color>[
-      for (final MascotShapeRow row in rows)
+      for (final MascotShapeRow row in shapeRows)
         _fillFromHex(row.fill).withAlpha((row.opacity.clamp(0.0, 1.0) * 255).round()),
     ],
   );
