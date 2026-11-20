@@ -202,6 +202,9 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
       _chatReplyController.clear();
     });
     _scrollToBottom();
+    // v0.8.14: a reply that lands on the final line also finishes the
+    // reveal (the old Show-my-tidy-plan button is gone).
+    _maybeFinishChatReveal();
   }
   String? _error;
   List<_ChatLine> _lines = <_ChatLine>[];
