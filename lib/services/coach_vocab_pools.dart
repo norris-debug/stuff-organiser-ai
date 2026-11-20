@@ -41,7 +41,7 @@ const List<String> kObservationLeads = <String>[
   "I can see",
   "The photos show",
   "What stands out is",
-  "Right away, there is",
+  "Right away, I notice",
   "The scan picks up",
   "One thing reads clearly:",
 ];
