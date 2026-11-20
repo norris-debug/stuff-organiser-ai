@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.20+40
+version: 0.8.21+41
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -140,3 +140,10 @@ flutter:
 # paperclip step explicitly (browsers cannot attach photos for the
 # user - attach in upload order, then Send), closing the gap where the
 # first live scan went out with zero attachments.
+# v0.8.21+41: web photo-prefill (steward directive) - the forward
+# action's web primary path now hands the photos + the prefilled email
+# text to the browser's Web Share API (the share sheet opens with the
+# photos already attached on Web Share Level 2 browsers; a user-cancel
+# does not fall through to a second prompt); the prefilled mailto
+# compose remains the fallback where the API is missing or refuses the
+# payload. No new dependencies - dart:html + dart:js_util only.

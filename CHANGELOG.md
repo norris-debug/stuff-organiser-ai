@@ -2,6 +2,10 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.21+41 - 2026-11-20
+
+- Web photo-prefill (steward directive): the forward action's web primary path now hands the photos plus the prefilled email text to the browser's Web Share API - on browsers that support sharing files (Web Share Level 2) the share sheet opens with the scanned photos already attached, so the compose starts with them in place (add the recipient and Send). The prefilled mailto compose (v0.8.19/20, with the manual-attach hint) remains the fallback where the API is missing or refuses the payload, and a user-cancelled share sheet no longer double-prompts with the fallback. APK native share unchanged.
+
 ## v0.8.20+40 - 2026-11-20
 
 - Semantics test mode: opening the web app with ?semantics=1 forces the accessibility/semantics tree on (same deployed build, no separate artifact, CanvasKit untouched) - this is what dynamic walkthrough automation and screen-reader verification need on web, where the tree otherwise only comes up when an assistive technology is detected. CI builds can force the same with --dart-define=FORCE_SEMANTICS=true.
