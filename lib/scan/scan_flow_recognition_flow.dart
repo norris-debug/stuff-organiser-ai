@@ -7,8 +7,7 @@ part of 'scan_flow.dart';
 /// v0.8.5 pasted ONE list for the whole scan, so every angle after the
 /// first went unread - the app appeared to consider only the first
 /// uploaded image. Now each uploaded photo gets its own paste step,
-/// matching the lane's per-image reads and the one-slot-per-angle render
-/// gallery. The dialog also tracks the visual viewport, so on iOS Safari
+/// matching the lane's per-image reads and the one-slot-per-angle gallery. The dialog also tracks the visual viewport, so on iOS Safari
 /// it jumps above the keyboard and the input box shrinks while typing.
 extension _ScanRecognitionFlow on _ScanFlowScreenState {
   void _buildAwaitingChat() {
@@ -80,16 +79,16 @@ extension _ScanRecognitionFlow on _ScanFlowScreenState {
     _buildChatLines();
   }
 
-  /// One keyboard-aware paste dialog. Returns null when cancelled; a
+  /// One keyboard-aware paste dialog. Returns null when canceled; a
   /// skipped angle returns an empty list.
   ///
   /// v0.8.18 (run #175): the dialog is a real StatefulWidget now. The
   /// old inline version disposed its TextEditingController the moment
-  /// showDialog resolved - while the exit transition was still animating
-  /// the TextField - so the pop animation rebuilt the field against a
-  /// dead controller, tore the frame mid-build, and the intake's
+  /// showResolve resolved - while the exit transition was still animating
+  /// the TextField - so the pop animation rebuilt against a dead
+  /// controller, tore the frame mid-build, and the intake's
   /// follow-up state updates never landed. Ownership inside the dialog
-  /// State fixes the timing: its dispose runs only after the route has
+  /// fixes the timing: its dispose runs only after the route has
   /// fully left the tree.
   Future<_AnglePaste?> _pasteListDialog(String title) async {
     final String? raw = await showDialog<String>(
@@ -107,8 +106,10 @@ extension _ScanRecognitionFlow on _ScanFlowScreenState {
 /// Keyboard-aware paste dialog (v0.8.18, run #175). Owns its controller
 /// and keyboard-inset notifier so both are disposed only after the exit
 /// transition has finished - see _pasteListDialog for the fault history.
-/// Cancel pops null, Skip pops the empty string, Coach-from-this pops
-/// the typed list.
+/// Ownership inside the dialog fixes the timing: its dispose runs only after the route has
+/// fully left the tree.
+/// Cancel pops null, Skip pops the empty string, Coach-from-this
+/// pops the typed list.
 class _RecognitionPasteDialog extends StatefulWidget {
   const _RecognitionPasteDialog({required this.title});
 
@@ -143,52 +144,61 @@ class _RecognitionPasteDialogState extends State<_RecognitionPasteDialog> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<double>(
       valueListenable: _keyboardInset,
-      builder: (BuildContext context, double inset, _) => AlertDialog(
-        scrollable: true,
-        alignment: inset > 0 ? Alignment.topCenter : Alignment.center,
-        title: Text(widget.title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text('One object per line with its confidence:'),
-            const SizedBox(height: 6),
-            const Text('loose papers - 92%'),
-            const Text('notebooks - 60%'),
-            const Text('collar tag - 40%'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _controller,
-              minLines: 2,
-              maxLines: inset > 0 ? 4 : 8,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'Paste the list from the recognition lane',
-                border: OutlineInputBorder(),
+      builder: (BuildContext context, double inset, _) {
+        // v0.8.23: fixed iOS paste-box collapse. The old code used
+        // inset > 0 to detect keyboard, which fired on any tiny inset
+        // change and immediately: (a) shrank the field from 8 to 4
+        // lines, (b) hid ALL action buttons, (c) slammed the dialog
+        // to topCenter. Now: threshold is 48px (real keyboard is
+        // ~300+px on iOS), maxLines stays at 8, actions never hide,
+        // and insetPadding pushes the dialog up when keyboard is up.
+        final bool keyboardUp = inset > 48;
+        return AlertDialog(
+          scrollable: true,
+          alignment: keyboardUp ? Alignment.topCenter : Alignment.center,
+          insetPadding: keyboardUp
+              ? EdgeInsets.only(bottom: inset + 24)
+              : const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+          title: Text(widget.title),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text('One object per line with its confidence:'),
+              const SizedBox(height: 6),
+              const Text('loose papers - 92%'),
+              const Text('notebooks - 60%'),
+              const Text('collar tag - 40%'),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _controller,
+                minLines: 2,
+                maxLines: 8,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Paste the list from the recognition lane',
+                  border: OutlineInputBorder(),
+                ),
               ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(''),
+              child: const Text('Skip this angle'),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(context).pop(_controller.text),
+              child: const Text('Coach from this'),
             ),
           ],
-        ),
-        // v0.8.9: the action buttons hide while the keyboard is up so
-        // the input box keeps its height instead of compressing away.
-        actions: inset > 0
-            ? const <Widget>[]
-            : <Widget>[
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(null),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(''),
-                  child: const Text('Skip this angle'),
-                ),
-                FilledButton(
-                  onPressed: () =>
-                      Navigator.of(context).pop(_controller.text),
-                  child: const Text('Coach from this'),
-                ),
-              ],
-      ),
+        );
+      },
     );
   }
 }
