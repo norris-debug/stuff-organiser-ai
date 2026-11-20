@@ -2,6 +2,10 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.26+46 - 2026-11-20
+
+- Semantics merge (Meiosis R6-F2): the scan pick stage's disabled Next now merges its button role and enabled state onto ONE accessibility node (container:true + button:true + the enabled flag) - the bare parent wrap from v0.8.24 landed role and enabled on separate nodes, so web automation and screen readers read neither as aria-disabled at zero photos / while analysing. The R4-F1 badge fix stays closed (replicated 2/2 in R6); the debug-only sample-photos affordance is unchanged.
+
 ## v0.8.25+45 - 2026-11-20
 
 - QA sample-photos affordance (Meiosis task-3): with the ?semantics=1 test mode on, the scan pick stage shows a debug-only "Load sample photos" button that appends two bundled sample photos (tiny flat-illustration PNGs, decoded from in-repo base64 constants - no asset registration) to the queue. Photo-dependent dynamic checks (gallery strip, results, venue pages, forward action) no longer need the native file chooser or camera permission. The affordance is semantics-labeled for automation; without the test mode it renders nothing (not even spacing) and behavior is unchanged.
