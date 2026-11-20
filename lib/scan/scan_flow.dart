@@ -20,6 +20,7 @@ import 'web_camera.dart';
 import 'web_keyboard.dart';
 
 part 'scan_flow_models.dart';
+part 'scan_flow_draft.dart';
 part 'scan_flow_capture.dart';
 part 'scan_flow_dictation.dart';
 part 'scan_flow_analyze.dart';
