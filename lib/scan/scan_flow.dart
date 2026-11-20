@@ -57,6 +57,9 @@ part 'scan_flow_loader.dart';
 /// v0.8.17: the coach vocabulary rotates per scan (seeded no-repeat
 /// bundles) and the scan-to-email forward action gives app-user scans a
 /// path to the recognition lane on the interim route.
+/// v0.8.18 (R2-01): the plan save reads a snapshot handed in by the
+/// caller, so a flow reset racing the side effects can no longer turn
+/// the save into a silent no-op.
 class ScanFlowScreen extends StatefulWidget {
   const ScanFlowScreen({
     super.key,
@@ -231,6 +234,10 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
   /// v0.7: appends the coach's suggestions to the Tidy Plan tab as a new
   /// part named for the picked venue. The storage key must stay in sync
   /// with PlanScreen._dataKey (tidy_plan_todo_v1).
+  /// v0.8.18 (R2-01): the plan and venue ride in as parameters so the
+  /// caller can hand over a snapshot taken before its awaits - a
+  /// _resetFlow() racing the save can no longer turn it into a silent
+  /// no-op. Null keeps the old live-state behavior.
   static const String _tidyPlanStorageKey = 'tidy_plan_todo_v1';
   static int _scanIdCounter = 0;
 
@@ -239,8 +246,10 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     return 't${DateTime.now().microsecondsSinceEpoch}-$_scanIdCounter';
   }
 
-  Future<_SaveResult> _savePlanToTidyList() async {
-    if (_plan.suggestions.isEmpty) return _SaveResult.empty;
+  Future<_SaveResult> _savePlanToTidyList({_ScanPlan? plan, String? venue}) async {
+    final _ScanPlan savedPlan = plan ?? _plan;
+    final String savedVenue = venue ?? _scanVenue;
+    if (savedPlan.suggestions.isEmpty) return _SaveResult.empty;
     final SharedPreferences prefs = widget.prefs;
     final String raw = prefs.getString(_tidyPlanStorageKey) ?? '';
     List<dynamic> parts;
@@ -257,10 +266,9 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
       // partial save.
       return _SaveResult.corrupt;
     }
-    final String venue = _scanVenue;
-    final String partName = venue.isNotEmpty ? venue : 'Scanned space';
+    final String partName = savedVenue.isNotEmpty ? savedVenue : 'Scanned space';
     final List<Map<String, dynamic>> tasks = <Map<String, dynamic>>[];
-    for (final _Suggestion suggestion in _plan.suggestions) {
+    for (final _Suggestion suggestion in savedPlan.suggestions) {
       final String steps = suggestion.steps.join(' -> ');
       String detail = suggestion.detail;
       if (steps.isNotEmpty) {
