@@ -15,23 +15,18 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
     // hides, so the reply field keeps its height instead of compressing.
     final bool keyboardUp = MediaQuery.of(context).viewInsets.bottom > 0;
     final bool hideButtons = keyboardUp && _showChatReplyBar;
-    // v0.8.11: the standalone Paste Recognized List button is gone -
-    // paste lives as a quiet inline link inside the waiting bubble.
+    // v0.8.14: the Show my tidy plan button is gone per the steward
+    // directive - finishing the coach's reveal flows straight into the
+    // tidy plan page (see _maybeFinishChatReveal), so the tidying
+    // suggestion is always delivered in the chat first. The paste
+    // fallback stays as the quiet inline link inside the waiting bubble.
     Widget? actionButton;
-    if (!hideButtons) {
-      if (allRevealed) {
-        actionButton = FilledButton.icon(
-          onPressed: _openResult,
-          icon: const Icon(Icons.checklist_rounded),
-          label: const Text('Show my tidy plan'),
-        );
-      } else {
-        actionButton = OutlinedButton.icon(
-          onPressed: _revealNext,
-          icon: const Icon(Icons.arrow_downward),
-          label: const Text('Next'),
-        );
-      }
+    if (!hideButtons && !allRevealed) {
+      actionButton = OutlinedButton.icon(
+        onPressed: _revealNext,
+        icon: const Icon(Icons.arrow_downward),
+        label: const Text('Next'),
+      );
     }
     return Column(
       children: <Widget>[

@@ -93,6 +93,22 @@ extension _ScanChatFlow on _ScanFlowScreenState {
       if (_revealed < _lines.length) _revealed++;
     });
     _scrollToBottom();
+    _maybeFinishChatReveal();
+  }
+
+  /// v0.8.14: the standalone "Show my tidy plan" button is gone per the
+  /// steward directive. Finishing the coach's reveal now flows straight
+  /// into the tidy plan page, so the tidying suggestion is always
+  /// delivered in the chat first and a premature skip onto an empty plan
+  /// is impossible. The short delay lets the last line land before the
+  /// transition.
+  void _maybeFinishChatReveal() {
+    if (_revealed < _lines.length || _lines.isEmpty) return;
+    Future<void>.delayed(const Duration(milliseconds: 900)).then((_) {
+      if (!mounted || _stage != _ScanStage.chat) return;
+      if (_revealed < _lines.length) return;
+      _openResult();
+    });
   }
 
   void _openResult() {
