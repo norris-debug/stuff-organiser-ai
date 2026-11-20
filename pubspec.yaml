@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.19+39
+version: 0.8.20+40
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -118,8 +118,8 @@ flutter:
 # the caller, so a flow reset racing the side effects can no longer turn
 # the save into a silent no-op) plus the functional test gate: real
 # widget tests for the badge-from-package-metadata, the Plan tab storage
-# contract (stored parts, empty first run, honest corrupt banner), the
-# duplicate-space guard and the full scan->plan integration (paste
+# contract (stored parts render, empty first run, honest corrupt banner),
+# the duplicate-space guard and the full scan->plan integration (paste
 # recognition -> save + venue auto-add + unpacked items, flagged reads
 # out). image_picker_platform_interface rides as a dev dependency for the
 # picker double used by the integration test.
@@ -131,3 +131,12 @@ flutter:
 # but-non-List store reports the honest corrupt banner on both sides
 # instead of being silently overwritten - pinned by two new widget tests
 # (Plan tab non-List banner + scan-side no-overwrite).
+# v0.8.20+40: semantics test mode - main() forces the accessibility
+# semantics tree on when the web URL carries ?semantics=1 (or the build
+# sets --dart-define=FORCE_SEMANTICS=true), which is what dynamic
+# walkthrough automation and screen-reader verification need on the
+# CanvasKit web build; no separate artifact, no workflow change. Plus
+# the manual-attach hint: the forward flow's labeling now names the
+# paperclip step explicitly (browsers cannot attach photos for the
+# user - attach in upload order, then Send), closing the gap where the
+# first live scan went out with zero attachments.
