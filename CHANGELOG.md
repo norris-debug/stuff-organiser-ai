@@ -2,6 +2,10 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.25+45 - 2026-11-20
+
+- QA sample-photos affordance (Meiosis task-3): with the ?semantics=1 test mode on, the scan pick stage shows a debug-only "Load sample photos" button that appends two bundled sample photos (tiny flat-illustration PNGs, decoded from in-repo base64 constants - no asset registration) to the queue. Photo-dependent dynamic checks (gallery strip, results, venue pages, forward action) no longer need the native file chooser or camera permission. The affordance is semantics-labeled for automation; without the test mode it renders nothing (not even spacing) and behavior is unchanged.
+
 ## v0.8.24+44 - 2026-11-20
 
 - Crown-fill wave (Leaf's path pack v2 rev 4 + anime variants v1-2): one hair-colored forehead fill per flagged character (twin tails, glasses boy, bob cut) closes the exposed-skin band between the fringe's top edge and the head silhouette - the measured gap boxes drop from 5,228 / 6,357 / 5,475 px² of exposed skin to zero, verified by pixel scan and clean on-camera renders at 1024px and 96px tiles (mid-gray background, tile-size read). The happy mouth overrides re-verified byte-exact against the variant pack; blindfolded's spiky silhouette stays untouched by design.
