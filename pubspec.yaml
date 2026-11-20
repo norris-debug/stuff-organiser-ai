@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.12+32
+version: 0.8.13+33
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -70,3 +70,7 @@ flutter:
 # food, anime): the renderer swaps exactly the mouth shape(s) per
 # mascot via mascot_happy_overrides.dart while idle (and every other
 # mood) keeps the byte-verified v2 base geometry.
+# v0.8.13+33: dashboard title spacing - the title block moves down
+# (top padding + a taller app bar) so the "Stuff Organiser AI" title's
+# top gap matches the Demo mode chip; badge text synced in the same
+# commit. Title wording swap rides the next build once confirmed.

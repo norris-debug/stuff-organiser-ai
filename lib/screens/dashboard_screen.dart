@@ -70,8 +70,13 @@ class DashboardScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 64,
-        title: Column(
+        // v0.8.13: taller app bar so the title block can sit lower without
+        // clipping the version line.
+        toolbarHeight: 76,
+        // v0.8.13: title top gap matched to the Demo mode chip.
+        title: Padding(
+          padding: const EdgeInsets.only(top: 14),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const Text('Stuff Organiser AI'),
@@ -80,12 +85,13 @@ class DashboardScreen extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             ),
             Text(
-              'v0.8.12+32',
+              'v0.8.13+33',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.outline,
               ),
             ),
           ],
+          ),
         ),
         actions: <Widget>[
           if (state.demoMode)
