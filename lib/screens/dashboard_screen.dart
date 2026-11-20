@@ -92,8 +92,19 @@ class DashboardScreen extends StatelessWidget {
               future: PackageInfo.fromPlatform(),
               builder: (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
                 final PackageInfo? info = snapshot.data;
+                // v0.8.24 (R4-F1): CI stamps version.json as the single-key
+                // probe format, so web's PackageInfo carries the whole
+                // '0.8.23+43' string as version with an empty buildNumber -
+                // plain concatenation rendered a dangling trailing plus. A
+                // version already carrying its build is used as-is; the
+                // build number is appended only when present.
+                final String versionLabel = info == null
+                    ? ''
+                    : info.version.contains('+')
+                        ? 'v${info.version}'
+                        : 'v${info.version}+${info.buildNumber}';
                 return Text(
-                  info == null ? '' : 'v${info.version}+${info.buildNumber}',
+                  versionLabel,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.outline,
                   ),
