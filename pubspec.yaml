@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.15+35
+version: 0.8.16+36
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -17,6 +17,7 @@ dependencies:
   cloud_firestore: ^5.4.4
   http: ^1.2.2
   image_picker: ^1.1.2
+  package_info_plus: ^8.1.2
   permission_handler: 12.0.3
   provider: ^6.1.2
   shared_preferences: ^2.3.2
@@ -82,3 +83,17 @@ flutter:
 # depth, nose tuck and y-coords untouched) per Leaf's validated pack v1.1
 # - closes the shy-smile flag from the v0.8.12 wiring check. Everything
 # else byte-identical.
+# v0.8.16+36: the QA fix batch plus the "Your spaces" redesign (Herrick's
+# directive + Meiosis's regression findings): the tidy plan auto-saves when
+# the result page opens (closing the tab can no longer lose suggestions);
+# every scanned venue auto-adds to "Your spaces" and its recognized
+# confirmed/verify objects land as unpacked items on the venue's page
+# (flagged reads stay out); first runs start with an empty home (the demo
+# seed is gone); coach interjections and the notes echo render as coach
+# bubbles; onboarding is double-tap guarded; whitespace-only renames are
+# rejected in the state layer; corrupt plan stores are reported honestly on
+# both the save side and the Plan tab; the venue page goes multi-select with
+# a "Finish organizing" bottom button (three-dots delete gone) and tappable
+# "Drop in [venue]" chips; the dashboard badge derives from package
+# metadata (package_info_plus); docs corrected (photo count, mess scaling,
+# Settings About, PWA manifest, page title).
