@@ -62,7 +62,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
-    ImagePicker.platform = _FakeImagePicker(const <XFile>[]);
+    ImagePickerPlatform.instance = _FakeImagePicker(const <XFile>[]);
   });
 
   test('duplicate space guard reuses case-insensitive matches', () async {
@@ -156,7 +156,7 @@ void main() {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final AppState state = _demoState(prefs);
 
-    ImagePicker.platform = _FakeImagePicker(<XFile>[
+    ImagePickerPlatform.instance = _FakeImagePicker(<XFile>[
       XFile.fromData(
         base64Decode(_kPng1x1),
         name: 'photo-1.jpg',
