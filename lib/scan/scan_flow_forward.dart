@@ -17,12 +17,12 @@ part of 'scan_flow.dart';
 /// - the flow ends on honest labeling - renders and the recognized item
 ///   list arrive by email, so nothing spins.
 ///
-/// The recipient is intentionally NOT hardcoded: the user addresses the
-/// email themselves (the repo is public - no private address belongs in
-/// source). The coach's receive mailbox watches for the subject pattern.
-/// v0.8.18: the web fallback now opens an actual compose - the shipped
-/// clipboard-only fallback sent nothing unless the user hand-wrote the
-/// whole email, which is the failure the steward's test exposed.
+/// v0.8.17: the recipient was user-addressed only (the repo is public).
+/// v0.8.19 (steward ruling): the receive mailbox address is published -
+/// the web compose opens pre-addressed to afantashoon@gmail.com and the
+/// labeling names the destination (which also covers the APK share path,
+/// where a recipient cannot be prefilled). The coach's receive mailbox
+/// watches for the subject pattern.
 
 /// The attached photos as share files, named in upload order.
 List<XFile> _forwardFiles(List<Uint8List> bytes, List<String> mimes) {
@@ -82,21 +82,25 @@ Future<String> launchForwardPackage({
     scanId: scanId,
   );
   if (kIsWeb) {
-    // Web: open a real email compose with the package prefilled. The
+    // Web: open a real email compose with the package prefilled and
+    // pre-addressed to the coach's receive mailbox (v0.8.19). The
     // photos ride by hand (browsers cannot attach files for us), so the
     // labeling says exactly that.
-    final String mailto = 'mailto:?subject=${Uri.encodeComponent(subject)}'
+    final String mailto =
+        'mailto:afantashoon@gmail.com?subject=${Uri.encodeComponent(subject)}'
         '&body=${Uri.encodeComponent(body)}';
     try {
       openMailCompose(Uri.parse(mailto));
-      return "Email compose opened - attach the photos in upload order "
-          "(photo 1 first), add the coach's address, and send. Renders and "
-          "the recognized item list arrive by email.";
+      return "Email compose opened - addressed to afantashoon@gmail.com, "
+          "the coach's receive mailbox. Attach the photos in upload order "
+          "(photo 1 first) and send. Renders and the recognized item list "
+          "arrive by email.";
     } catch (_) {
       await Clipboard.setData(ClipboardData(text: body));
       return "This browser could not open an email compose - the package "
-          "body is copied. Paste it into an email to the coach and attach "
-          "the photos in upload order (photo 1 first).";
+          "body is copied. Paste it into an email to afantashoon@gmail.com "
+          "(the coach's receive mailbox) and attach the photos in upload "
+          "order (photo 1 first).";
     }
   }
   final List<XFile> files = _forwardFiles(photoBytes, photoMimes);
