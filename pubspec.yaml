@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.13+33
+version: 0.8.14+34
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -74,3 +74,7 @@ flutter:
 # (top padding + a taller app bar) so the "Stuff Organiser AI" title's
 # top gap matches the Demo mode chip; badge text synced in the same
 # commit. Title wording swap rides the next build once confirmed.
+# v0.8.14+34: the "Show my tidy plan" button is gone from the coach chat
+# per the steward directive - finishing the coach's reveal flows straight
+# into the tidy plan page, so the tidying suggestion is always delivered
+# in the chat first and a premature skip onto an empty plan is impossible.
