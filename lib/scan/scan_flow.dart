@@ -18,6 +18,7 @@ import '../state/app_state.dart';
 import '../state/app_state_spaces.dart';
 import '../theme/app_theme.dart';
 import '../widgets/mascot_widget.dart';
+import 'scan_forward_mailto.dart';
 import 'web_camera.dart';
 import 'web_keyboard.dart';
 
@@ -161,7 +162,6 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     _chatScroll.dispose();
     _notesController.dispose();
     _venueController.dispose();
-    _chatReplyController.dispose();
     _speech?.stop();
     // v0.8.6: the scan flow is the only screen that opens the web camera
     // sheet, so it owns the full release of the shared camera session.
