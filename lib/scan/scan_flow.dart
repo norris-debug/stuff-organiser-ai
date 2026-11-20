@@ -24,6 +24,7 @@ part 'scan_flow_recognition_flow.dart';
 part 'scan_flow_chat.dart';
 part 'scan_flow_ui1.dart';
 part 'scan_flow_ui2.dart';
+part 'scan_flow_ui2b.dart';
 part 'scan_flow_ui3.dart';
 part 'scan_flow_thinking.dart';
 part 'scan_flow_loader.dart';
@@ -65,6 +66,7 @@ class _ChatLine {
     this.isPhoto = false,
     this.isHeading = false,
     this.isConfirmation = false,
+    this.isPasteAction = false,
   });
 
   final String text;
@@ -76,6 +78,11 @@ class _ChatLine {
   /// this line, so the chat shows a reply bar while it is the latest
   /// revealed line and still unanswered.
   final bool isConfirmation;
+
+  /// v0.8.11: this line carries the quiet inline paste link (the
+  /// recognition lane's interim manual route) so the waiting bubble
+  /// never leaves the scan without a way in.
+  final bool isPasteAction;
 }
 
 /// One concrete, physical action the coach proposes.
