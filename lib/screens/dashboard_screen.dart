@@ -80,7 +80,7 @@ class DashboardScreen extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             ),
             Text(
-              'v0.8.8+28',
+              'v0.8.10+30',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.outline,
               ),

@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.9+29
+version: 0.8.10+30
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -52,3 +52,10 @@ flutter:
 # input box keeps its height; the anime three (twin tails, glasses boy,
 # bob cut) replace the ninja/idol/mage alternates with Leaf's traced art
 # (saved selections migrate to the pack default automatically).
+# v0.8.10+30: mascot polish wave - all 15 mascots render from Leaf's
+# path pack v2 (revision 2): animal head bases are true circles at tile
+# spec (cat, red panda, quokka and sea otter rebuilt as exact 760px
+# centered circles; bunny rebuilt clean from the approved sample) and
+# the anime fringe outlines are smoothed to soft rounded waves (the
+# blindfolded spiky outline stays untouched as the locked design); the
+# dashboard version badge is synced again (it had lagged at v0.8.8+28).
