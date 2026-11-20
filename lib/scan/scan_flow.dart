@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart' as permissions;
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as speech;
 
@@ -22,6 +23,7 @@ import 'web_keyboard.dart';
 
 part 'scan_flow_models.dart';
 part 'scan_flow_draft.dart';
+part 'scan_flow_forward.dart';
 part 'scan_flow_capture.dart';
 part 'scan_flow_dictation.dart';
 part 'scan_flow_analyze.dart';
@@ -52,6 +54,9 @@ part 'scan_flow_loader.dart';
 /// opens - the tidy plan auto-saves (closing the tab can no longer lose
 /// suggestions), the scanned venue auto-adds to "Your spaces" and the
 /// recognized objects land as unpacked items on the venue's page.
+/// v0.8.17: the coach vocabulary rotates per scan (seeded no-repeat
+/// bundles) and the scan-to-email forward action gives app-user scans a
+/// path to the recognition lane on the interim route.
 class ScanFlowScreen extends StatefulWidget {
   const ScanFlowScreen({
     super.key,
