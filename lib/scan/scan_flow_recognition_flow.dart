@@ -29,6 +29,14 @@ extension _ScanRecognitionFlow on _ScanFlowScreenState {
             'coach you from what is actually in the room.',
         isPasteAction: true,
       ),
+      // v0.8.17: the Lane 2 interim route - the forward action sits
+      // beside the paste fallback so a scan always has a path to the
+      // recognition lane, hands-free or manual.
+      const _ChatLine(
+        text: 'Or forward this scan to the coach by email - the renders '
+            'and the recognized item list come back the same way.',
+        isForwardAction: true,
+      ),
     ];
     _setUiState(() {
       _lines = lines;

@@ -13,6 +13,7 @@ class _ChatLine {
     this.isHeading = false,
     this.isConfirmation = false,
     this.isPasteAction = false,
+    this.isForwardAction = false,
   });
 
   final String text;
@@ -29,6 +30,10 @@ class _ChatLine {
   /// recognition lane's interim manual route) so the waiting bubble
   /// never leaves the scan without a way in.
   final bool isPasteAction;
+
+  /// v0.8.17: this line renders the scan-to-email forward action card
+  /// (Lane 2 interim route) instead of a plain text bubble.
+  final bool isForwardAction;
 }
 
 /// One concrete, physical action the coach proposes.

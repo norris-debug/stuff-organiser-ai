@@ -188,10 +188,50 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
                       ),
                     ],
                   )
-                : bubble,
+                : _awaitingRecognition && line.isForwardAction
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          bubble,
+                          // v0.8.17: the Lane 2 interim route - the
+                          // forward action hands the photos, venue, notes
+                          // and scan ID to the email app; the labeling
+                          // line lands when the intent is handed off, so
+                          // nothing spins.
+                          TextButton.icon(
+                            onPressed: _forwardScan,
+                            icon: const Icon(Icons.forward_to_inbox_rounded,
+                                size: 18),
+                            label: const Text('Forward scan by email'),
+                          ),
+                        ],
+                      )
+                    : bubble,
           ),
         ],
       ),
     );
+  }
+
+  /// v0.8.17: hands the current scan's photos, venue and notes to the
+  /// email app as the Lane 2 forward package (scan_flow_forward.dart).
+  /// The honest labeling line lands as a coach line when the intent is
+  /// handed off - the flow ends there, no spinner.
+  Future<void> _forwardScan() async {
+    if (_photos.isEmpty) return;
+    final String labeling = await launchForwardPackage(
+      photoBytes: _photos.map((_PhotoItem p) => p.bytes).toList(),
+      photoMimes: _photos.map((_PhotoItem p) => p.mime).toList(),
+      venue: _scanVenue,
+      notes: _notesController.text.trim(),
+      scanId: _newScanId(),
+    );
+    if (!mounted) return;
+    _setUiState(() {
+      _lines = <_ChatLine>[..._lines, _ChatLine(text: labeling)];
+      _revealed = _lines.length;
+    });
+    _scrollToBottom();
   }
 }
