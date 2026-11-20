@@ -134,11 +134,15 @@ extension _ScanPickUi on _ScanFlowScreenState {
               ),
             ),
             const SizedBox(width: 10),
-            // v0.8.24 (Meiosis R4): the disabled Next must expose its
-            // enabled state to the semantics tree - screen readers and
-            // automation read the distinction at zero photos / while
-            // analysing.
+            // v0.8.24 (Meiosis R4) / v0.8.26 (Meiosis R6-F2): the disabled
+            // Next must expose role + enabled state in ONE semantics node -
+            // a bare parent wrap lands them on separate nodes, so web
+            // automation reads neither as aria-disabled. container:true
+            // merges the button's own semantics (role + label) into this
+            // node.
             Semantics(
+              container: true,
+              button: true,
               enabled: !_analyzing && hasPhotos,
               child: FilledButton.icon(
                 onPressed:

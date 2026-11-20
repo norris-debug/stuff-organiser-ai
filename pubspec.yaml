@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.25+45
+version: 0.8.26+46
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -166,3 +166,7 @@ flutter:
 # button that appends two bundled sample photos to the queue, so
 # photo-dependent stages can be exercised without the native file
 # chooser or camera permission; invisible to normal users.
+# v0.8.26+46: the pick stage's disabled Next merges its button role and
+# enabled state onto ONE semantics node (container:true) - the bare
+# parent wrap from v0.8.24 landed role and enabled on separate nodes, so
+# web automation read neither as aria-disabled (Meiosis R6-F2).
