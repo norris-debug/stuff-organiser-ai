@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.21+41
+version: 0.8.22+42
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -147,3 +147,8 @@ flutter:
 # does not fall through to a second prompt); the prefilled mailto
 # compose remains the fallback where the API is missing or refuses the
 # payload. No new dependencies - dart:html + dart:js_util only.
+# v0.8.22+42: anime fringe rebuild (Leaf path pack v2 rev 3 + variants
+# v1-1) - the three flagged fringes (twin tails, glasses boy, bob cut)
+# are redrawn as single smooth arcs; the scallop rhythm that still read
+# as sawtooth at 96px grid-tile size is gone. Happy mouth overrides
+# untouched; idle variants byte-identical to the new base.
