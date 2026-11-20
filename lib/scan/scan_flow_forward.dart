@@ -28,6 +28,10 @@ part of 'scan_flow.dart';
 /// them in the email window in upload order, then send (the first live
 /// scan went out with zero attachments because the step was only
 /// implied).
+/// v0.8.21: the web primary path hands the photos plus the prefilled
+/// email text to the browser's Web Share API (the share sheet opens
+/// with the photos already attached on supporting browsers); the
+/// prefilled mailto compose stays as the fallback.
 
 /// The attached photos as share files, named in upload order.
 List<XFile> _forwardFiles(List<Uint8List> bytes, List<String> mimes) {
@@ -87,8 +91,26 @@ Future<String> launchForwardPackage({
     scanId: scanId,
   );
   if (kIsWeb) {
-    // Web: open a real email compose with the package prefilled and
-    // pre-addressed to the coach's receive mailbox (v0.8.19). The
+    // v0.8.21 web primary path: the Web Share API hands the photos and
+    // the prefilled email text to the browser's share sheet - on
+    // supporting browsers the compose opens with the photos already
+    // attached (add the recipient and send). The prefilled mailto
+    // compose (v0.8.19/20) stays as the fallback for browsers without
+    // Web Share Level 2.
+    final bool shared = await sharePhotosViaWebShare(
+      bytes: photoBytes,
+      mimes: photoMimes,
+      subject: subject,
+      body: body,
+    );
+    if (shared) {
+      return 'Share sheet opened - the scanned photos are already '
+          'attached. Pick your email app, add afantashoon@gmail.com (the '
+          "coach's receive mailbox) as the recipient, then press Send. "
+          'Renders and the recognized item list arrive by email.';
+    }
+    // Web fallback: open a real email compose with the package prefilled
+    // and pre-addressed to the coach's receive mailbox (v0.8.19). The
     // photos ride by hand (browsers cannot attach files for us), so
     // the labeling says exactly that - v0.8.20 names the paperclip
     // step explicitly, since the implied version was missed on the
