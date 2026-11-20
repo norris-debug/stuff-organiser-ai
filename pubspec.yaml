@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.16+36
+version: 0.8.17+37
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -23,6 +23,7 @@ dependencies:
   shared_preferences: ^2.3.2
   speech_to_text: 7.4.0
   google_fonts: ^6.2.1
+  share_plus: ^10.1.2
 
 dev_dependencies:
   flutter_test:
@@ -97,3 +98,17 @@ flutter:
 # "Drop in [venue]" chips; the dashboard badge derives from package
 # metadata (package_info_plus); docs corrected (photo count, mess scaling,
 # Settings About, PWA manifest, page title).
+# v0.8.17+37: coach vocabulary variety (Norris directive) + the scan-to-
+# email forward action (Lane 2, Cellulose's receive lane verified end to
+# end): the plan drafter, the bucket suggestions and the chat assembly now
+# rotate wording through a per-scan seeded no-repeat vocabulary bundle
+# (rotating openers, varied lead-ins, confirmation questions, discard
+# phrasings, Dan/Sha/Ri phrasings) so two scans never read alike while one
+# conversation stays coherent; the Danshari method is untouched. Coach
+# confirmation points are flagged structurally via a parallel list instead
+# of matched by fixed opening words. The forward action lands in the scan
+# flow right after upload: the photos ride in upload order with a body
+# line pinning the order, the venue and the typed notes, and the scan ID
+# in the subject line; APK shares natively, web uses the browser share
+# sheet where it supports files and a mailto fallback where it does not,
+# and the flow ends on the "package sent" labeling so nothing spins.
