@@ -16,10 +16,11 @@ extension _ScanChatFlow on _ScanFlowScreenState {
     );
     lines.add(_ChatLine(text: _introLine()));
     if (notes.isNotEmpty) {
+      // v0.8.16 (Meiosis TC-20): the notes echo is the coach speaking -
+      // it renders as a coach bubble, not a user bubble.
       lines.add(
         _ChatLine(
           text: 'You told me: ${_clip(notes, 140)} - I folded that into the plan.',
-          isUser: true,
         ),
       );
     }
@@ -41,12 +42,9 @@ extension _ScanChatFlow on _ScanFlowScreenState {
         lines.add(_ChatLine(text: 'How to do it: ${suggestion.steps.join(' -> ')}'));
       }
       if (i < plan.suggestions.length - 1) {
-        lines.add(
-          _ChatLine(
-            text: _interjections[i % _interjections.length],
-            isUser: true,
-          ),
-        );
+        // v0.8.16 (Meiosis TC-20): interjections are the coach's own
+        // asides - they render as coach bubbles, not user bubbles.
+        lines.add(_ChatLine(text: _interjections[i % _interjections.length]));
       }
     }
     lines.add(
@@ -115,7 +113,56 @@ extension _ScanChatFlow on _ScanFlowScreenState {
     _setUiState(() {
       _stage = _ScanStage.result;
     });
+    // v0.8.16 (TC-23): the scan's leave-behinds run as the result page
+    // opens, so closing the tab can no longer lose anything.
+    unawaited(_completeScanSideEffects());
   }
+
+  /// v0.8.16: everything a scan must leave behind runs once, as the
+  /// result page opens (TC-23):
+  /// - the tidy plan auto-saves into the Tidy Plan tab;
+  /// - the scanned venue auto-adds to "Your spaces" (TC-24);
+  /// - the confirmed and verify objects from the recognition lane land as
+  ///   unpacked items inside that venue's page. Flagged reads (under 50%
+  ///   confidence) stay out - they are the "too unsure to act on" tier
+  ///   by design.
+  Future<void> _completeScanSideEffects() async {
+    if (_scanSideEffectsDone) return;
+    _scanSideEffectsDone = true;
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    final AppState state = widget.appState;
+    final String venue = _scanVenue;
+    if (venue.isNotEmpty) {
+      final Space space =
+          await state.addSpaceIfMissing(venue, emoji: _emojiForVenue(venue));
+      for (final _RecognizedObject object in _recognized) {
+        if (object.tier == 2) continue;
+        final ItemCategory category = _bucketOf(object.label) == 0
+            ? ItemCategory.paper
+            : ItemCategory.household;
+        // Rescans of the same room never stack duplicate items.
+        if (state.findDuplicate(object.label, space.id) != null) continue;
+        await state.addItem(
+          name: object.label,
+          category: category,
+          spaceId: space.id,
+          paperAction: category == ItemCategory.paper ? PaperAction.sort : null,
+        );
+      }
+    }
+    final _SaveResult result = await _savePlanToTidyList();
+    if (!mounted) return;
+    if (result == _SaveResult.saved || result == _SaveResult.corrupt) {
+      messenger.showSnackBar(SnackBar(content: Text(_saveMessage(result))));
+    }
+  }
+
+  String _saveMessage(_SaveResult result) => switch (result) {
+        _SaveResult.saved => 'Saved to the Tidy Plan tab',
+        _SaveResult.empty => 'Nothing to save - new round started',
+        _SaveResult.corrupt =>
+          'Could not save - the stored plan data is unreadable. Nothing was changed.',
+      };
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -178,4 +225,21 @@ extension _ScanChatFlow on _ScanFlowScreenState {
     }
     return buffer.toString();
   }
+}
+
+/// Picks a pastel-tile emoji for a scanned venue by name, so auto-added
+/// spaces read like the rest of "Your spaces".
+String _emojiForVenue(String name) {
+  final String n = name.toLowerCase();
+  if (n.contains('kitchen')) return '🍳';
+  if (n.contains('bed')) return '🛏️';
+  if (n.contains('wardrobe') || n.contains('closet')) return '👕';
+  if (n.contains('desk') || n.contains('office') || n.contains('study')) return '🗂️';
+  if (n.contains('bath')) return '🛁';
+  if (n.contains('living') || n.contains('lounge')) return '🛋️';
+  if (n.contains('dining')) return '🍽️';
+  if (n.contains('laundry')) return '🧺';
+  if (n.contains('garage')) return '🧰';
+  if (n.contains('balcony') || n.contains('garden')) return '🪴';
+  return '📦';
 }
