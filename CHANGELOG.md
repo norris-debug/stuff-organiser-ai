@@ -2,6 +2,12 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.17+37 - 2026-11-20
+
+- Coach vocabulary variety (steward directive): the plan drafter, the bucket suggestions and the chat assembly now rotate wording through a per-scan seeded, no-repeat vocabulary bundle - rotating openers, varied lead-ins, confirmation questions, discard phrasings and Dan/Sha/Ri phrasings - so two scans never read alike while one conversation stays coherent. The Danshari method is untouched; only the wording rotates.
+- Coach confirmation points are flagged structurally (a parallel list on the plan) instead of matched by fixed opening words.
+- Scan-to-email forward action (Lane 2 interim route): the waiting bubble gains "Forward scan by email" beside the paste fallback. The package carries the photos in upload order with a body line pinning the order, the venue, the typed notes, and the scan ID in the subject line. APK shares natively; web uses the browser share sheet where it supports files and a copied body where it does not (honest about that edge). The flow ends on the "package sent" labeling - renders and the item list arrive by email, nothing spins. The recipient is not hardcoded; the user addresses the email.
+
 ## v0.8.16+36 - 2026-11-20
 
 - Save-at-result-entry: the tidy plan auto-saves the moment the result page opens, so closing the tab can no longer lose suggestions (the back arrow no longer discards - nothing can).
