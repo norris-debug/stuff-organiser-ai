@@ -3,7 +3,6 @@
 // pasted-recognition intake end to end.
 import 'dart:convert';
 
-import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
@@ -214,28 +213,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     // find.text('Next') because the shipped Next is an OutlinedButton.icon
-    // (exact-type finders never see it), and the Next cooldown reads
-    // clock.now() so fake time advances it between taps.
+    // (exact-type finders never see it), and the app's Next cooldown reads
+    // clock.now() so fake time advances it between taps. The cooldown gap
+    // is driven by pump(750ms) - run #181 proved that awaiting a plain
+    // Future.delayed inside the loop stalls the test body.
     int revealGuard = 0;
-    debugPrint(
-        'DIAG loop-enter fake=${clock.now()} next=${find.text('Next').evaluate().length}');
     while (find.text('Next').evaluate().isNotEmpty) {
       revealGuard++;
       if (revealGuard > 40) {
-        debugPrint('DIAG reveal-guard hit at 40 iterations - breaking');
         break;
       }
-      debugPrint(
-          'DIAG iter=$revealGuard fake=${clock.now()} next=${find.text('Next').evaluate().length}');
       await tester.tap(find.text('Next'));
       await tester.pump();
-      // pump(750ms) advances fake time through the 700ms cooldown without
-      // relying on fake-timer flushing - the 10-minute timeout in run #181
-      // hung while awaiting a plain Future.delayed inside the loop.
       await tester.pump(const Duration(milliseconds: 750));
     }
-    debugPrint(
-        'DIAG loop-exit iters=$revealGuard fake=${clock.now()} chat=${find.text('Coach chat').evaluate().length} plan=${find.text('Your tidy plan').evaluate().length}');
 
     // Finishing the reveal auto-flows into the result page, which runs the
     // scan's leave-behinds: plan save, venue auto-add, item landing.
