@@ -82,71 +82,114 @@ extension _ScanRecognitionFlow on _ScanFlowScreenState {
 
   /// One keyboard-aware paste dialog. Returns null when cancelled; a
   /// skipped angle returns an empty list.
+  ///
+  /// v0.8.18 (run #175): the dialog is a real StatefulWidget now. The
+  /// old inline version disposed its TextEditingController the moment
+  /// showDialog resolved - while the exit transition was still animating
+  /// the TextField - so the pop animation rebuilt the field against a
+  /// dead controller, tore the frame mid-build, and the intake's
+  /// follow-up state updates never landed. Ownership inside the dialog
+  /// State fixes the timing: its dispose runs only after the route has
+  /// fully left the tree.
   Future<_AnglePaste?> _pasteListDialog(String title) async {
-    final TextEditingController controller = TextEditingController();
-    final ValueNotifier<double> keyboardInset = ValueNotifier<double>(0);
-    final void Function() cancelInset =
-        watchWebKeyboardInset((double inset) => keyboardInset.value = inset);
-    final bool? ok = await showDialog<bool>(
+    final String? raw = await showDialog<String>(
       context: context,
-      builder: (BuildContext dialogContext) => ValueListenableBuilder<double>(
-        valueListenable: keyboardInset,
-        builder: (BuildContext context, double inset, _) => AlertDialog(
-          scrollable: true,
-          alignment: inset > 0 ? Alignment.topCenter : Alignment.center,
-          title: Text(title),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text('One object per line with its confidence:'),
-              const SizedBox(height: 6),
-              const Text('loose papers - 92%'),
-              const Text('notebooks - 60%'),
-              const Text('collar tag - 40%'),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller,
-                minLines: 2,
-                maxLines: inset > 0 ? 4 : 8,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Paste the list from the recognition lane',
-                  border: OutlineInputBorder(),
-                ),
+      builder: (BuildContext dialogContext) =>
+          _RecognitionPasteDialog(title: title),
+    );
+    if (!mounted) return null;
+    if (raw == null) return null;
+    if (raw.isEmpty) return const _AnglePaste();
+    return _AnglePaste(_parseRecognition(raw));
+  }
+}
+
+/// Keyboard-aware paste dialog (v0.8.18, run #175). Owns its controller
+/// and keyboard-inset notifier so both are disposed only after the exit
+/// transition has finished - see _pasteListDialog for the fault history.
+/// Cancel pops null, Skip pops the empty string, Coach-from-this pops
+/// the typed list.
+class _RecognitionPasteDialog extends StatefulWidget {
+  const _RecognitionPasteDialog({required this.title});
+
+  final String title;
+
+  @override
+  State<_RecognitionPasteDialog> createState() =>
+      _RecognitionPasteDialogState();
+}
+
+class _RecognitionPasteDialogState extends State<_RecognitionPasteDialog> {
+  final TextEditingController _controller = TextEditingController();
+  final ValueNotifier<double> _keyboardInset = ValueNotifier<double>(0);
+  void Function()? _cancelInset;
+
+  @override
+  void initState() {
+    super.initState();
+    _cancelInset =
+        watchWebKeyboardInset((double inset) => _keyboardInset.value = inset);
+  }
+
+  @override
+  void dispose() {
+    _cancelInset?.call();
+    _controller.dispose();
+    _keyboardInset.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<double>(
+      valueListenable: _keyboardInset,
+      builder: (BuildContext context, double inset, _) => AlertDialog(
+        scrollable: true,
+        alignment: inset > 0 ? Alignment.topCenter : Alignment.center,
+        title: Text(widget.title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text('One object per line with its confidence:'),
+            const SizedBox(height: 6),
+            const Text('loose papers - 92%'),
+            const Text('notebooks - 60%'),
+            const Text('collar tag - 40%'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _controller,
+              minLines: 2,
+              maxLines: inset > 0 ? 4 : 8,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'Paste the list from the recognition lane',
+                border: OutlineInputBorder(),
               ),
-            ],
-          ),
-          // v0.8.9: the action buttons hide while the keyboard is up so
-          // the input box keeps its height instead of compressing away.
-          actions: inset > 0
-              ? const <Widget>[]
-              : <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(null),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(false),
-                    child: const Text('Skip this angle'),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(true),
-                    child: const Text('Coach from this'),
-                  ),
-                ],
+            ),
+          ],
         ),
+        // v0.8.9: the action buttons hide while the keyboard is up so
+        // the input box keeps its height instead of compressing away.
+        actions: inset > 0
+            ? const <Widget>[]
+            : <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(null),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(''),
+                  child: const Text('Skip this angle'),
+                ),
+                FilledButton(
+                  onPressed: () =>
+                      Navigator.of(context).pop(_controller.text),
+                  child: const Text('Coach from this'),
+                ),
+              ],
       ),
     );
-    cancelInset();
-    final String raw = controller.text;
-    controller.dispose();
-    keyboardInset.dispose();
-    if (!mounted) return null;
-    if (ok == null) return null;
-    if (!ok) return const _AnglePaste();
-    final List<_RecognizedObject> items = _parseRecognition(raw);
-    return _AnglePaste(items);
   }
 }
 
