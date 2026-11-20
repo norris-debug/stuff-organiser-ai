@@ -261,11 +261,15 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
       // list; real corruption still throws into the guard.
       final dynamic decoded =
           raw.trim().isEmpty ? <dynamic>[] : jsonDecode(raw);
-      if (decoded is List<dynamic>) {
-        parts = decoded;
-      } else {
-        parts = <dynamic>[];
+      if (decoded is! List<dynamic>) {
+        // v0.8.19 (R3-F1): a valid-JSON-but-non-List store is corruption
+        // on this side too - throw into the guard below so the save
+        // reports the honest banner instead of silently overwriting the
+        // unreadable store (the Plan tab's cast already does exactly
+        // this on its side).
+        throw const FormatException('tidy plan store is not a list');
       }
+      parts = decoded;
     } catch (_) {
       // v0.8.16 (TC-11): a corrupt store is reported, never silently
       // treated as "nothing to save" - and never overwritten with a
