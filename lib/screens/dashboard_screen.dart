@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../models/space.dart';
@@ -84,11 +85,20 @@ class DashboardScreen extends StatelessWidget {
               state.user?.displayLabel ?? 'Guest',
               style: theme.textTheme.bodySmall,
             ),
-            Text(
-              'v0.8.15+35',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.outline,
-              ),
+            // v0.8.16: the badge is derived from the package metadata
+            // (Meiosis task-3), so it can never drift from the real build
+            // version again - pubspec is the single source of truth.
+            FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
+                final PackageInfo? info = snapshot.data;
+                return Text(
+                  info == null ? '' : 'v${info.version}+${info.buildNumber}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                );
+              },
             ),
           ],
           ),
@@ -330,7 +340,9 @@ class _EmptySpaces extends StatelessWidget {
           children: <Widget>[
             Text('No spaces yet', style: theme.textTheme.titleMedium),
             const SizedBox(height: 6),
-            Text('Add your first space to start a plan.', style: theme.textTheme.bodyMedium),
+            // v0.8.16: first runs start empty - a venue appears here the
+            // moment it is scanned.
+            Text('Scan a room and it shows up here automatically.', style: theme.textTheme.bodyMedium),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => showAddSpaceDialog(context),
@@ -388,6 +400,7 @@ class _ScanCard extends StatelessWidget {
                     prefs: state.prefs,
                     mascot: state.mascot,
                     pack: state.themePack,
+                    appState: state,
                   ),
                 ),
               ),
