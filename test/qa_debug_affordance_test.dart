@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stuff_organiser_ai/debug/qa_sample_assets.dart';
 import 'package:stuff_organiser_ai/debug/qa_tools.dart';
