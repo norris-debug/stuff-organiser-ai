@@ -88,6 +88,14 @@ extension _ScanPickUi on _ScanFlowScreenState {
             ),
           ],
         ),
+        // v0.8.25 (QA): debug-only affordance - with the ?semantics=1 test
+        // mode on, automation can load bundled sample photos instead of
+        // driving the native file chooser (which the CanvasKit browser
+        // cannot). Nothing renders for normal users, not even spacing.
+        if (soaiDebugMode) ...<Widget>[
+          const SizedBox(height: 10),
+          SamplePhotosDebugButton(onInject: _injectSamplePhotos),
+        ],
         if (hasPhotos) ...<Widget>[
           const SizedBox(height: 10),
           Text(
@@ -234,5 +242,22 @@ extension _ScanPickUi on _ScanFlowScreenState {
         },
       ),
     );
+  }
+
+  /// v0.8.25 (QA): appends the bundled sample photos to the queue in one
+  /// rebuild, respecting the room left under the cap.
+  void _injectSamplePhotos() {
+    final int room = _maxPhotos - _photos.length;
+    if (room <= 0) return;
+    final List<Uint8List> samples = loadSamplePhotoBytes();
+    final List<_PhotoItem> picked = <_PhotoItem>[
+      for (final Uint8List bytes in samples.take(room))
+        _PhotoItem(bytes: bytes, mime: 'image/png'),
+    ];
+    if (picked.isEmpty) return;
+    _setUiState(() {
+      _photos = <_PhotoItem>[..._photos, ...picked];
+      _error = null;
+    });
   }
 }
