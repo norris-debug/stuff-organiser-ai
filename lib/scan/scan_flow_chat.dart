@@ -136,16 +136,24 @@ extension _ScanChatFlow on _ScanFlowScreenState {
   ///   unpacked items inside that venue's page. Flagged reads (under 50%
   ///   confidence) stay out - they are the "too unsure to act on" tier
   ///   by design.
+  /// v0.8.18 (R2-01): everything this method needs is snapshotted before
+  /// the first await. _resetFlow() can run while the item adds are still
+  /// in flight (the user tapping "Scan another room"), and it clears
+  /// _plan, _recognized and the venue field - without the snapshot the
+  /// follow-up save read cleared state and silently saved nothing.
   Future<void> _completeScanSideEffects() async {
     if (_scanSideEffectsDone) return;
     _scanSideEffectsDone = true;
+    final _ScanPlan plan = _plan;
+    final List<_RecognizedObject> recognized =
+        List<_RecognizedObject>.of(_recognized);
+    final String venue = _scanVenue;
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
     final AppState state = widget.appState;
-    final String venue = _scanVenue;
     if (venue.isNotEmpty) {
       final Space space =
           await state.addSpaceIfMissing(venue, emoji: _emojiForVenue(venue));
-      for (final _RecognizedObject object in _recognized) {
+      for (final _RecognizedObject object in recognized) {
         if (object.tier == 2) continue;
         final ItemCategory category = _bucketOf(object.label) == 0
             ? ItemCategory.paper
@@ -160,7 +168,8 @@ extension _ScanChatFlow on _ScanFlowScreenState {
         );
       }
     }
-    final _SaveResult result = await _savePlanToTidyList();
+    final _SaveResult result =
+        await _savePlanToTidyList(plan: plan, venue: venue);
     if (!mounted) return;
     if (result == _SaveResult.saved || result == _SaveResult.corrupt) {
       messenger.showSnackBar(SnackBar(content: Text(_saveMessage(result))));
