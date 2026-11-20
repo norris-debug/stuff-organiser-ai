@@ -12,6 +12,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as speech;
 
+import '../debug/qa_sample_assets.dart';
+import '../debug/qa_tools.dart';
 import '../models/item.dart';
 import '../models/space.dart';
 import '../services/coach_vocab_pools.dart';
