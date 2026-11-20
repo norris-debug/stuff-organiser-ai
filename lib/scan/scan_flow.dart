@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as speech;
 
 import '../models/item.dart';
+import '../models/space.dart';
 import '../state/app_state.dart';
 import '../state/app_state_spaces.dart';
 import '../theme/app_theme.dart';
