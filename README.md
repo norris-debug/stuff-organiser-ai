@@ -65,6 +65,21 @@ Interpretation runs on the recognition lane; photos never leave the device in
 demo mode. The old optional Gemini-key route was retired from the pipeline
 (v0.6.9).
 
+## Scan forward lane (email)
+
+App-user scans reach the recognition lane by email while the automated
+transport is pending. After uploading a scan, the waiting bubble offers
+"Forward scan by email": the package carries the photos in upload order (with
+a body line pinning the order), the venue and the typed notes, and the scan ID
+names the subject line ("Stuff Organiser scan <id>").
+
+- The web compose opens pre-addressed to **afantashoon@gmail.com** — the
+  coach's receive mailbox. Attach the photos in upload order and send.
+- On Android, the native share sheet carries the photos as attachments; the
+  in-app hint names the destination address to send to.
+- The mailbox watches for subjects beginning with "Stuff Organiser scan";
+  the organized renders and the recognized item list arrive back by email.
+
 ## Firebase (optional, for real accounts)
 
 - Keys at build time:

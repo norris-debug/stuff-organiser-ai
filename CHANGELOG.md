@@ -2,6 +2,11 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.19+39 - 2026-11-20
+
+- Cellulose connection (steward priority): the scan-to-email forward now opens pre-addressed - the web mailto compose carries afantashoon@gmail.com as the recipient, the in-app labeling names the destination (covering the APK share path, which cannot prefill a recipient), and the README documents the lane.
+- R3-F1 (QA): the scan save mirrors the Plan tab's cast - a valid-JSON-but-non-List tidy-plan store now reports the honest corrupt banner on both sides instead of being silently overwritten. New widget tests pin the Plan tab's non-List banner and the scan side's no-overwrite guarantee.
+
 ## v0.8.18+38 - 2026-11-20
 
 - R2-01 (scan-save race, Firebase mode): the scan's leave-behind save now reads a snapshot of the plan, the recognized list and the venue taken before its first await - a flow reset racing the side effects can no longer turn the save into a silent no-op. Demo mode's window was near-zero; this hardens Firebase mode before that switch flips.
@@ -23,7 +28,7 @@ Continues from the changelog sections in README.md (v0.1 - v0.5).
 - Onboarding double-tap guard (UI flag plus a state-layer backstop); whitespace-only renames rejected in the state layer.
 - Corrupt plan stores are reported honestly on the save side and in a Plan tab banner; the next successful save replaces the bad data.
 - Dashboard badge derives from package metadata (package_info_plus) - no more manual syncs.
-- Docs: photo count (six per scan), mess-scaling behavior, Settings About, PWA manifest name/description, page title.
+- Docs: photo count (six per scan), mess-scaling behavior, Settings About, PWA manifest, page title.
 
 ## v0.8.14+34 - 2026-11-20
 
