@@ -250,20 +250,3 @@ extension _ScanChatFlow on _ScanFlowScreenState {
     return buffer.toString();
   }
 }
-
-/// Picks a pastel-tile emoji for a scanned venue by name, so auto-added
-/// spaces read like the rest of "Your spaces".
-String _emojiForVenue(String name) {
-  final String n = name.toLowerCase();
-  if (n.contains('kitchen')) return '🍳';
-  if (n.contains('bed')) return '🛏️';
-  if (n.contains('wardrobe') || n.contains('closet')) return '👕';
-  if (n.contains('desk') || n.contains('office') || n.contains('study')) return '🗂️';
-  if (n.contains('bath')) return '🛁';
-  if (n.contains('living') || n.contains('lounge')) return '🛋️';
-  if (n.contains('dining')) return '🍽️';
-  if (n.contains('laundry')) return '🧺';
-  if (n.contains('garage')) return '🧰';
-  if (n.contains('balcony') || n.contains('garden')) return '🪴';
-  return '📦';
-}
