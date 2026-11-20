@@ -212,11 +212,14 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
+          // v0.8.16: the About copy describes the app as it actually is -
+          // the old MVP/v2 wording described plans that already shipped.
           const _Section(
             title: 'About',
             child: Text(
-              'Stuff Organiser AI - MVP v1.\n'
-              'Photo-based item detection and real mascot art are coming in v2.',
+              'Stuff Organiser AI - scan a room, get a tidy plan.\n'
+              'Photos stay on your device; the recognition labels drive the coach.\n'
+              'Demo mode runs fully offline - no accounts, no cloud.',
             ),
           ),
         ],
