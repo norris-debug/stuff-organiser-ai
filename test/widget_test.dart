@@ -97,6 +97,34 @@ void main() {
     expect(find.text('Demo mode'), findsOneWidget);
   });
 
+  testWidgets('dashboard badge holds the web single-key format (R4-F1)',
+      (WidgetTester tester) async {
+    // CI stamps version.json as {"version":"0.8.23+43"}; web
+    // package_info_plus parses that file, so info.version carries the full
+    // string and buildNumber comes back empty. The label must render exactly
+    // 'v0.8.23+43' - no dangling trailing plus.
+    PackageInfo.setMockInitialValues(
+      appName: 'Stuff Organiser AI',
+      packageName: 'com.example.stuff_organiser_ai',
+      version: '0.8.23+43',
+      buildNumber: '',
+      buildSignature: '',
+    );
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'onboarding_complete': true,
+    });
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final AppState state = await _bootstrappedState(prefs);
+
+    await tester.pumpWidget(StuffOrganiserApp(appState: state));
+    // Fixed pumps - the mascot idle bob never settles.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('v0.8.23+43'), findsOneWidget);
+    expect(find.text('v0.8.23+43+'), findsNothing);
+  });
+
   testWidgets('plan tab renders the stored tidy plan parts',
       (WidgetTester tester) async {
     final List<Map<String, dynamic>> parts = <Map<String, dynamic>>[
