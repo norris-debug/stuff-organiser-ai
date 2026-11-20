@@ -92,7 +92,10 @@ void main() {
     final AppState state = await _bootstrappedState(prefs);
 
     await tester.pumpWidget(StuffOrganiserApp(appState: state));
-    await tester.pumpAndSettle();
+    // The dashboard mounts the mascot, whose idle bob repeats forever -
+    // pumpAndSettle can never settle there, so pump fixed frames instead.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('v0.8.18+38'), findsOneWidget);
     expect(find.text('Demo mode'), findsOneWidget);
@@ -122,6 +125,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bedroom'), findsOneWidget);
+    // Parts start collapsed - the task lines do not exist in the tree
+    // until the part is opened, so tap the header first.
+    await tester.tap(find.text('Bedroom'));
+    await tester.pump();
     expect(find.text('Fold the red scarf into one stack'), findsOneWidget);
   });
 
@@ -181,6 +188,14 @@ void main() {
     expect(find.byType(Image), findsWidgets);
 
     // Next runs the (fake-timed) analysis and opens the waiting chat.
+    // The pick stage is a lazy ListView and on the default test viewport
+    // the Next button sits below the fold - scroll it into view first.
+    await tester.scrollUntilVisible(
+      find.text('Next'),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
     await tester.tap(find.text('Next'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1600));
@@ -188,14 +203,18 @@ void main() {
 
     expect(find.text('Paste recognized list'), findsOneWidget);
     await tester.tap(find.text('Paste recognized list'));
-    await tester.pumpAndSettle();
+    // Mascots in the chat bubbles behind the dialog repeat forever, so
+    // pumpAndSettle can never settle - pump the dialog open instead.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     await tester.enterText(
       find.byType(TextField),
       'loose papers - 92%\nred scarf - 75%\nmystery gadget - 40%',
     );
     await tester.tap(find.text('Coach from this'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Reveal the whole coach conversation. The Next control is rate
     // limited on real wall-clock time, so wait it out between taps.
@@ -208,7 +227,10 @@ void main() {
     // Finishing the reveal auto-flows into the result page, which runs
     // the scan's leave-behinds: plan save, venue auto-add, item landing.
     await tester.pump(const Duration(milliseconds: 1000));
-    await tester.pumpAndSettle();
+    // The result page also carries a repeating mascot - flush the
+    // side-effect chain with fixed pumps instead of settling.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Venue auto-add (TC-24) - exactly one space, reused on rescans by
     // the duplicate guard.
