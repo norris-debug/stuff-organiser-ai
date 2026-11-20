@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.14+34
+version: 0.8.15+35
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -78,3 +78,7 @@ flutter:
 # per the steward directive - finishing the coach's reveal flows straight
 # into the tidy plan page, so the tidying suggestion is always delivered
 # in the chat first and a premature skip onto an empty plan is impossible.
+# v0.8.15+35: bunny's happy mouth widened 1.4x (82 -> 114.80px, width-only;
+# depth, nose tuck and y-coords untouched) per Leaf's validated pack v1.1
+# - closes the shy-smile flag from the v0.8.12 wiring check. Everything
+# else byte-identical.

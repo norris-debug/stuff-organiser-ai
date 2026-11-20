@@ -4,6 +4,8 @@ import 'mascot_path_data.dart';
 /// (idle + happy variant wave, all 15). Keys and shape indices match
 /// the base traced lists in mascot_paths_*.dart; each override
 /// replaces exactly the mouth shape(s). Pastel tiles stay coded.
+/// v0.8.15: bunny's happy mouth widened 1.4x width-only (82 -> 114.80px,
+/// depth and top-y untouched) per Leaf's validated pack v1.1.
 const Map<String, Map<int, MascotShapeRow>> kHappyOverrides = <String, Map<int, MascotShapeRow>>{
   'anime_blindfolded': <int, MascotShapeRow>{
     10: MascotShapeRow('#3A3230', 1.0, 'M 457.06 663.56 C 481.14 669.74 542.43 669.74 566.51 663.56 C 566.51 684.90 544.62 699.12 511.79 699.12 C 478.95 699.12 457.06 684.90 457.06 663.56 Z'),
@@ -21,7 +23,7 @@ const Map<String, Map<int, MascotShapeRow>> kHappyOverrides = <String, Map<int, 
     15: MascotShapeRow('#3A3230', 1.0, 'M 454.51 604.92 C 478.09 611.24 538.13 611.24 561.71 604.92 C 561.71 626.77 540.27 641.34 508.11 641.34 C 475.95 641.34 454.51 626.77 454.51 604.92 Z'),
   },
   'bunny': <int, MascotShapeRow>{
-    12: MascotShapeRow('#3B3733', 1.0, 'M 471.00 653.72 C 491.50 657.56 532.50 657.56 553.00 653.72 C 553.00 682.52 536.60 701.72 512.00 701.72 C 487.40 701.72 471.00 682.52 471.00 653.72 Z'),
+    12: MascotShapeRow('#3B3733', 1.0, 'M 454.60 653.72 C 483.30 657.56 540.70 657.56 569.40 653.72 C 569.40 682.52 546.44 701.72 512.00 701.72 C 477.56 701.72 454.60 682.52 454.60 653.72 Z'),
   },
   'cat': <int, MascotShapeRow>{
     13: MascotShapeRow('#3A3230', 1.0, 'M 429.74 702.29 C 470.24 709.49 551.24 709.49 591.74 702.29 C 591.74 756.29 559.34 792.29 510.74 792.29 C 462.14 792.29 429.74 756.29 429.74 702.29 Z'),
