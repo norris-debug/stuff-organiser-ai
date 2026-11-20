@@ -2,6 +2,11 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.20+40 - 2026-11-20
+
+- Semantics test mode: opening the web app with ?semantics=1 forces the accessibility/semantics tree on (same deployed build, no separate artifact, CanvasKit untouched) - this is what dynamic walkthrough automation and screen-reader verification need on web, where the tree otherwise only comes up when an assistive technology is detected. CI builds can force the same with --dart-define=FORCE_SEMANTICS=true.
+- Manual-attach hint (first live scan gap): the forward flow's labeling now says plainly that browsers cannot attach the photos for you - tap the paperclip in the email window, add the scanned photos in upload order (photo 1 first), then Send. The first live scan package arrived with zero attachments because the step was only implied.
+
 ## v0.8.19+39 - 2026-11-20
 
 - Cellulose connection (steward priority): the scan-to-email forward now opens pre-addressed - the web mailto compose carries afantashoon@gmail.com as the recipient, the in-app labeling names the destination (covering the APK share path, which cannot prefill a recipient), and the README documents the lane.
