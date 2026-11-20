@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.26+46
+version: 0.8.27+47
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -170,3 +170,11 @@ flutter:
 # enabled state onto ONE semantics node (container:true) - the bare
 # parent wrap from v0.8.24 landed role and enabled on separate nodes, so
 # web automation read neither as aria-disabled (Meiosis R6-F2).
+# v0.8.27+47: the pick stage's disabled Next moves to a render-level
+# semantics host (SoaiSemanticsButton in lib/debug/qa_tools.dart): ONE
+# node carrying button role, label and the enabled state - the level the
+# web engine actually reads - with the tap action present only while
+# enabled and the inner button excluded, so the 0.8.26 wrapper stops
+# duplicating the accessible control (Meiosis R6-F2 + R7-F1; the
+# widget-level enabled paths never serialize the flag on this Flutter
+# web build). Live ARIA verification rides the R8 targeted pass.
