@@ -19,6 +19,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _page = 0;
   String _emoji = '🍳';
 
+  /// v0.8.16 (Meiosis TC-02): a rapid double-tap on "Start organising"
+  /// ran completion twice. The flag blocks the second press while the
+  /// first is still in flight.
+  bool _finishing = false;
+
   static const List<String> _emojis = <String>['🍳', '🗂️', '👕', '🛏️', '🛁', '🎸', '📚', '📦'];
 
   @override
@@ -41,7 +46,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _finish(AppState state) async {
-    await state.completeOnboarding(_spaceController.text, emoji: _emoji);
+    if (_finishing) return;
+    _finishing = true;
+    try {
+      await state.completeOnboarding(_spaceController.text, emoji: _emoji);
+    } finally {
+      _finishing = false;
+    }
   }
 
   @override
@@ -89,7 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     )
                   else
                     FilledButton.icon(
-                      onPressed: () => _finish(state),
+                      onPressed: _finishing ? null : () => _finish(state),
                       icon: const Icon(Icons.rocket_launch_outlined),
                       label: const Text('Start organising'),
                     ),
