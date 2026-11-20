@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.24+44
+version: 0.8.25+45
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -144,8 +144,8 @@ flutter:
 # action's web primary path now hands the photos + the prefilled email
 # text to the browser's Web Share API (the share sheet opens with the
 # photos already attached on Web Share Level 2 browsers; a user-cancel
-# does not fall through to a second prompt); the prefilled mailto
-# compose remains the fallback where the API is missing or refuses the
+# does not fall through to a second prompt); the prefilled mailto compose
+# remains the fallback where the API is missing or refuses the
 # payload. No new dependencies - dart:html + dart:js_util only.
 # v0.8.22+42: anime fringe rebuild (Leaf path pack v2 rev 3 + variants
 # v1-1) - the three flagged fringes (twin tails, glasses boy, bob cut)
@@ -161,3 +161,8 @@ flutter:
 # against the CI single-key version.json (no dangling trailing plus, with
 # a web-runtime fixture test); the scan pick stage's disabled Next carries
 # an explicit semantics enabled flag.
+# v0.8.25+45: QA sample-photos affordance - with the ?semantics=1 test
+# mode on, the scan pick stage shows a debug-only "Load sample photos"
+# button that appends two bundled sample photos to the queue, so
+# photo-dependent stages can be exercised without the native file
+# chooser or camera permission; invisible to normal users.
