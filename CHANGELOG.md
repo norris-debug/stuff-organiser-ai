@@ -2,6 +2,10 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.22+42 - 2026-11-20
+
+- Anime fringe rebuild (Leaf's path pack v2 rev 3 + anime variants v1-1): the three flagged forehead fringes (twin tails, glasses boy, bob cut) are redrawn as single smooth arcs - the scallop bump rhythm that still read as sawtooth at the 96px grid-tile size is gone (direction flips drop from 5-7 to 1 per edge), bang tips stay eye-safe and corner anchors stay pinned. Idle variants rebuild byte-identical from the new base; the happy mouth overrides are unchanged. Intake-verified: exactly 3 of 224 shapes differ from rev 2, format valid (M/L/C/Q/Z, 2-decimal coords, hex fills), and the on-camera recheck is clean at both 1024px and 96px tiles.
+
 ## v0.8.21+41 - 2026-11-20
 
 - Web photo-prefill (steward directive): the forward action's web primary path now hands the photos plus the prefilled email text to the browser's Web Share API - on browsers that support sharing files (Web Share Level 2) the share sheet opens with the scanned photos already attached, so the compose starts with them in place (add the recipient and Send). The prefilled mailto compose (v0.8.19/20, with the manual-attach hint) remains the fallback where the API is missing or refuses the payload, and a user-cancelled share sheet no longer double-prompts with the fallback. APK native share unchanged.
@@ -25,7 +29,7 @@ Continues from the changelog sections in README.md (v0.1 - v0.5).
 
 - Coach vocabulary variety (steward directive): the plan drafter, the bucket suggestions and the chat assembly now rotate wording through a per-scan seeded, no-repeat vocabulary bundle - rotating openers, varied lead-ins, confirmation questions, discard phrasings and Dan/Sha/Ri phrasings - so two scans never read alike while one conversation stays coherent. The Danshari method is untouched; only the wording rotates.
 - Coach confirmation points are flagged structurally (a parallel list on the plan) instead of matched by fixed opening words.
-- Scan-to-email forward action (Lane 2 interim route): the waiting bubble gains "Forward scan by email" beside the paste fallback. The package carries the photos in upload order with a body line pinning the order, the venue, the typed notes, and the scan ID in the subject line. APK shares natively; web uses the browser share sheet where it supports files and a copied body where it does not (honest about that edge). The flow ends on the "package sent" labeling - renders and the item list arrive by email, nothing spins. The recipient is not hardcoded; the user addresses the email.
+- Scan-to-email forward action (Lane 2 interim route): the waiting bubble gains "Forward scan by email" beside the paste fallback. The package carries the photos in upload order with a body line pinning the order, the venue and the typed notes, and the scan ID in the subject line. APK shares natively; web uses the browser share sheet where it supports files and a copied body where it does not (honest about that edge). The flow ends on the "package sent" labeling - renders and the item list arrive by email, nothing spins. The recipient is not hardcoded; the user addresses the email.
 
 ## v0.8.16+36 - 2026-11-20
 
