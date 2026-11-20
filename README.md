@@ -10,8 +10,9 @@ flutter pub get
 flutter run
 ```
 
-Boots straight into onboarding/dashboard with sample data. Firebase only activates
-when dart-define keys are provided; otherwise the app stays in demo mode by design.
+Boots straight into onboarding with an empty home: "Your spaces" and Today's plan
+fill up only from real scans and quick-adds. Firebase only activates when
+dart-define keys are provided; otherwise the app stays in demo mode by design.
 
 ## Android build (one command, then run)
 
@@ -42,32 +43,27 @@ The web-pages job also publishes the web build (plus the APK as a direct
 download) to GitHub Pages and stamps `build/web/version.json` with the pubspec
 version so the deployed build can be verified from outside.
 
-## Scan feature (v0.5)
+## Scan feature
 
-Photograph a messy space and the tidy coach analyses the actual photo:
+Photograph a messy space (up to six photos per scan — the first is the main
+view, extra angles welcome) and the tidy coach works from what the recognition
+lane actually reads:
 
-- Suggestions are concrete physical actions naming the real objects in shot
-  (sort the paper piles, stack the cups by size, corral the cables), in the
-  style of professional small-space organising: sort into keep / relocate /
-  donate-bin piles, group like with like, contain and label, use vertical
-  space, clear floor and surfaces.
-- The coach reports the visible **setting** (table / floor / shelf / bed /
-  desk / kitchen counter ...) and a **mess level** (tidy / moderate / messy).
-- The number of suggestions scales with the real mess: 1-2 for a tidy space,
-  4-6 for moderate, 8-12 for very messy — never a fixed count.
-- An **after-tidying picture** is generated: with a Gemini key it is a
-  photoreal edit of your own photo; without a key it falls back to a keyless
-  concept image and, if that is unavailable, to the in-app concept placeholder.
+- Each uploaded photo gets its own read from the recognition lane; the coach
+drafts every observation, suggestion and confirmation point from the merged
+object list, so different rooms produce different plans.
+- Reads are tiered by confidence: confirmed (85%+), verify (50–84%) and flagged
+(under 50%). Verify reads become confirmation points you can answer inline;
+flagged reads are shown but never acted on.
+- The number of suggestions scales with how much the lane found (2 for a light
+space, 3 for a fuller one, never more than 4), and the mess level chip
+(tidy / moderate / messy) comes from the object count.
+- The tidy plan auto-saves the moment the result page opens, and every scanned
+venue auto-adds to "Your spaces" with its recognized items ready to clear.
 
-Optional Gemini API key: open Scan → key icon in the top bar → paste → Save.
-The key stays on the device (shared_preferences) and is used only for photo
-analysis and after-shot generation.
-
-| Purpose | Models tried in order |
-| --- | --- |
-| Photo analysis | `gemini-2.5-flash`, `gemini-2.0-flash` |
-| After-shot image | `gemini-2.5-flash-image`, `gemini-2.5-flash-image-preview`, `gemini-2.0-flash-exp` |
-| Keyless fallback | Pollinations image URL seeded with a hash of the photo |
+Interpretation runs on the recognition lane; photos never leave the device in
+demo mode. The old optional Gemini-key route was retired from the pipeline
+(v0.6.9).
 
 ## Firebase (optional, for real accounts)
 
@@ -81,6 +77,10 @@ analysis and after-shot generation.
 
 User → Spaces → Items. One unified model: category `household | paper`,
 status `loose | organized`. Paper piles carry an action: `sort | keep | file | recycle`.
+
+## Changelog
+
+The running changelog lives in CHANGELOG.md; the v0.1 – v0.5 history is below.
 
 ## Changelog v0.1 → v0.2
 
@@ -99,45 +99,45 @@ status `loose | organized`. Paper piles carry an action: `sort | keep | file | r
 ## Changelog v0.2 → v0.3
 
 - Duplicate guard: quick-add detects an item with the same name already in the
-  target space and offers to increase the existing count, add a separate
-  entry, or cancel - no more silent clones.
+target space and offers to increase the existing count, add a separate
+entry, or cancel - no more silent clones.
 - Paper piles: the planned action (sort / keep / file / recycle) can now be
-  changed after creation from the item tile; the plan text follows the new
-  action.
+changed after creation from the item tile; the plan text follows the new
+action.
 - Reorder/move hardening: drag-reorder and cross-space moves validate that the
-  items and spaces still exist, skip redundant writes when nothing changed,
-  and persist immediately so ordering survives app restarts.
+items and spaces still exist, skip redundant writes when nothing changed,
+and persist immediately so ordering survives app restarts.
 - Order fix: new items take max(order)+1 inside a space, closing an order
-  collision after a cross-space move.
+collision after a cross-space move.
 - pubspec bumped to 0.3.0+3. No new dependencies; all v0.2 fixes retained.
 
 ## Changelog v0.3 → v0.4
 
 - New **Scan** feature: a camera "Scan" button on the home screen; the coach
-  chats the plan step by step in separate dialogue boxes, then a concept
-  preview plus the complete notes page with copy-all.
+chats the plan step by step in separate dialogue boxes, then a concept
+preview plus the complete notes page with copy-all.
 - Demo mode by default; optional Google AI Studio / Gemini key via the key
-  icon inside the scan screen, kept on-device, with graceful fallback to demo
-  whenever the live call fails.
+icon inside the scan screen, kept on-device, with graceful fallback to demo
+whenever the live call fails.
 - CI builds the web version and publishes it to GitHub Pages together with a
-  direct-download APK.
+direct-download APK.
 - pubspec bumped to 0.4.0+4. No new dependencies; all v0.3 fixes retained.
 
 ## Changelog v0.4 → v0.5
 
 - Scan now analyses what is actually in the photo: every suggestion names the
-  real objects and surfaces it can see and proposes a concrete physical action
-  instead of template advice (reference: professional organiser Kira Chan's
-  small-space tidying method).
+real objects and surfaces it can see and proposes a concrete physical action
+instead of template advice (reference: professional organiser Kira Chan's
+small-space tidying method).
 - The coach reports the visible setting and the mess level, both surfaced as
-  chips in the result stage and included in the copy digest.
+chips in the result stage and included in the copy digest.
 - The number of suggestions scales with the real messiness (1-2 for tidy,
-  4-6 for moderate, 8-12 for messy) instead of a fixed list.
+4-6 for moderate, 8-12 for messy) instead of a fixed list.
 - New generated "after tidying" picture: photoreal edit of the user's own
-  photo with a Gemini key; keyless Pollinations concept image otherwise, with
-  graceful degradation to the concept placeholder.
+photo with a Gemini key; keyless Pollinations concept image otherwise, with
+graceful degradation to the concept placeholder.
 - Richer offline demo coach: the photo hash selects one of three concrete
-  organiser play books (papers and files, cups and dishes, clothes / floor /
-  cables) and the suggestion count varies per photo.
+organiser play books (papers and files, cups and dishes, clothes / floor /
+cables) and the suggestion count varies per photo.
 - pubspec bumped to 0.5.0+5. CI stamps `build/web/version.json` with the
-  pubspec version for outside verification.
+pubspec version for outside verification.
