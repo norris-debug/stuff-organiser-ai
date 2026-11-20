@@ -2,9 +2,22 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.23+43 - 2026-11-20
+
+- iOS paste-box collapse fix (B992DC41 report): the paste recognized-list
+  dialog collapsed on click in the iOS web build. Root cause: the keyboard-
+  aware inset listener fired on any tiny inset change (inset > 0 threshold),
+  which immediately: (a) shrank the text field from 8 to 4 maxLines, (b) hid
+  ALL action buttons (Cancel, Skip, Coach-from-this), and (c) slammed the
+  dialog to topCenter. A stray tap then hit the dismiss barrier and closed the
+  intake empty. Fix: threshold raised to 48px (real keyboard is ~300+px on
+  iOS), maxLines stays at 8 always, actions never hide, and insetPadding
+  pushes the dialog up when keyboard is up. Root cause confirmed in
+  lib/scan/scan_flow_recognition_flow.dart _RecognitionPasteDialog.
+
 ## v0.8.22+42 - 2026-11-20
 
-- Anime fringe rebuild (Leaf's path pack v2 rev 3 + anime variants v1-1): the three flagged forehead fringes (twin tails, glasses boy, bob cut) are redrawn as single smooth arcs - the scallop bump rhythm that still read as sawtooth at the 96px grid-tile size is gone (direction flips drop from 5-7 to 1 per edge), bang tips stay eye-safe and corner anchors stay pinned. Idle variants rebuild byte-identical from the new base; the happy mouth overrides are unchanged. Intake-verified: exactly 3 of 224 shapes differ from rev 2, format valid (M/L/C/Q/Z, 2-decimal coords, hex fills), and the on-camera recheck is clean at both 1024px and 96px tiles.
+- Anime fringe rebuild (Leaf's path pack v2 rev 3 + anime variants v1-1): the three flagged forehead fringes (twin tails, glasses boy, bob cut) are redrawn as single smooth arcs - the scallop bump rhythm that still read as sawtooth at the 96px grid-tile size is gone (direction flips drop from 5-7 to 1 per edge), bang tips stay eye-safe and corner anchors stay pinned. Idle variants rebuilt byte-identical from the new base; the happy mouth overrides are unchanged. Intake-verified: exactly 3 of 224 shapes differ from rev 2, format valid (M/L/C/Q/Z, 2-decimal coords, hex fills), and the on-camera recheck is clean at both 1024px and 96px tiles.
 
 ## v0.8.21+41 - 2026-11-20
 
@@ -22,8 +35,8 @@ Continues from the changelog sections in README.md (v0.1 - v0.5).
 
 ## v0.8.18+38 - 2026-11-20
 
-- R2-01 (scan-save race, Firebase mode): the scan's leave-behind save now reads a snapshot of the plan, the recognized list and the venue taken before its first await - a flow reset racing the side effects can no longer turn the save into a silent no-op. Demo mode's window was near-zero; this hardens Firebase mode before that switch flips.
-- Functional test gate (Meiosis task-5): widget_test.dart gets real coverage - the dashboard badge derives from package metadata, the Plan tab honors the tidy-plan storage contract (stored parts render, first runs start empty, corrupt stores show the honest banner), the duplicate-space guard reuses case-insensitive matches, and a full scan-flow integration test drives pick -> gallery photos -> pasted recognition -> coach reveal -> result to verify the plan auto-save, the venue auto-add to "Your spaces", and that confirmed/verify objects land as unpacked items while flagged reads stay out.
+- R2-01 (scan-save race, Firebase mode): the scan's leave-behind save now reads a snapshot of the plan, the recognized list and the venue taken before its first await - a flow reset racing the save side-effects can no longer turn the save into a silent no-op. Demo mode's window was near-zero; this hardens Firebase mode before that switch flips.
+- Functional test gate (Meiosis task-5): widget_test.dart gets real coverage - the dashboard badge derives from package metadata, the Plan tab honors the tidy-plan storage contract (stored parts render, first runs start empty, corrupt stores show the honest banner), the duplicate-space guard reuses case-insensitive matches, and a full scan-flow integration test drives pick -> gallery photos -> pasted recognition -> coach reveal -> result to verify the plan auto-saves, the venue auto-adds to "Your spaces", and that confirmed/verify objects land as unpacked items while flagged reads stay out.
 
 ## v0.8.17+37 - 2026-11-20
 
@@ -37,8 +50,8 @@ Continues from the changelog sections in README.md (v0.1 - v0.5).
 - Venue auto-add: every scan with a venue adds it to "Your spaces"; rescans reuse the existing space. Confirmed and verify recognized objects land as unpacked items on the venue's page; flagged (under 50%) reads stay out by design.
 - Empty first run: the demo seed (kitchen mugs and plates, desk paper pile, wardrobe socks) is gone - "Your spaces" and Today's plan start empty and fill from real scans and quick-adds.
 - Venue page redesign: tap = select, and a "Finish organizing" bottom button clears the selection (the per-item three-dots delete is gone); "Drop in [venue]" chips open that venue's page on tap.
-- Coach attribution: interjections and the notes echo render as coach bubbles, not user bubbles.
-- Onboarding double-tap guard (UI flag plus a state-layer backstop); whitespace-only renames rejected in the state layer.
+- Coach attribution: interactions and the notes echo render as coach bubbles, not user bubbles.
+- Onboarding double-tap guard (UI flag plus a state-layer backup); whitespace-only renames are rejected in the state layer.
 - Corrupt plan stores are reported honestly on the save side and in a Plan tab banner; the next successful save replaces the bad data.
 - Dashboard badge derives from package metadata (package_info_plus) - no more manual syncs.
 - Docs: photo count (six per scan), mess-scaling behavior, Settings About, PWA manifest, page title.
