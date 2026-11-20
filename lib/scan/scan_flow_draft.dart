@@ -2,8 +2,14 @@ part of 'scan_flow.dart';
 
 // v0.8.17: the plan drafter lives in its own part file so every scan
 // library file stays push- and verify-sized (the v0.8.11 split
-// convention). The members moved here are part of the same library, so
-// no other file changes.
+// convention). The members moved here are part of the same library.
+//
+// v0.8.17: the wording rotates through the scan's vocabulary bundle
+// (_scanVocab in scan_flow_models.dart, seeded per scan in
+// scan_flow_analyze.dart): lead-ins, confirmation questions, discard
+// phrasings and the Danshari opener vary per scan and never repeat
+// consecutively. The Danshari backbone stays the method - only the
+// wording rotates.
 
 extension _ScanDrafting on _ScanFlowScreenState {
   String _bucketSuggestion(int bucket, List<_RecognizedObject> items) {
@@ -99,7 +105,7 @@ extension _ScanDrafting on _ScanFlowScreenState {
           title: 'Give the $labels one home',
           detail:
               'Hold each one and ask: do I need it, use it, love it? Whatever '
-              'fails all three has served its purpose - let it go.',
+              'fails all three ${_scanVocab.verbs.next(kDiscardVerbs)}.',
           steps: <String>[
             'Group the items by where they belong.',
             'Donate or bin the ones that fail the three questions.',
@@ -112,6 +118,11 @@ extension _ScanDrafting on _ScanFlowScreenState {
   /// Builds the coach plan from the recognized object list. Observations
   /// name the actual items with tier-honest wording, suggestions come from
   /// the biggest work buckets, and the Danshari opener leads.
+  /// v0.8.17: the opener, lead-ins, confirmation questions and discard
+  /// phrasing rotate through the scan's vocabulary bundle, and the
+  /// parallel [observationConfirmations] list marks the verify and
+  /// flagged reads so the chat's reply bar no longer relies on matching
+  /// fixed opening words.
   _ScanPlan _recognitionPlan(List<_RecognizedObject> items, String notes) {
     final List<_RecognizedObject> confirmed = <_RecognizedObject>[];
     final List<_RecognizedObject> verify = <_RecognizedObject>[];
@@ -126,14 +137,29 @@ extension _ScanDrafting on _ScanFlowScreenState {
       }
     }
     final int total = items.length;
-    final List<String> observations = <String>[
+    const List<String> danOpeners = <String>[
       'Before anything else, for each item ask: do I need, use and love '
           'this right now. Whatever fails all three goes to the donate or bin '
           'pile before any organising starts.',
+      'First rule of the method: hold each item to three questions - '
+          'need, use, love. Whatever fails all three leaves first, before '
+          'any organising starts.',
+      'We start with the three questions - need, use, love. Anything '
+          'that fails them all moves to the donate or bin pile before we '
+          'organise a thing.',
+      'The method leads with the joy check: need, use, love, in that '
+          'order. What fails all three goes out first - then we organise '
+          'what stays.',
     ];
+    final List<String> observations = <String>[
+      pickVocab(danOpeners, _scanVocab.seed),
+    ];
+    final List<bool> confirmationMarks = <bool>[false];
     if (confirmed.isNotEmpty) {
-      observations
-          .add('Straight from your scan, I can see: ${_joinLabels(confirmed)}.');
+      observations.add(
+          '${_scanVocab.leads.next(kObservationLeads)} '
+          '${_joinLabels(confirmed)}.');
+      confirmationMarks.add(false);
       final int pick = total % 3;
       if (pick == 0) {
         observations.add(
@@ -148,21 +174,26 @@ extension _ScanDrafting on _ScanFlowScreenState {
             'None of those needs a purchase or a project - just decisions '
             'and one home each.');
       }
+      confirmationMarks.add(false);
     }
     if (verify.isNotEmpty) {
       observations.add(
-          'I think I can also see ${_joinLabels(verify)} - double-check '
-          'those for me before we plan around them.');
+          'I think I can also see ${_joinLabels(verify)} - '
+          '${_scanVocab.asks.next(kConfirmationQuestions)}');
+      confirmationMarks.add(true);
     }
     if (flagged.isNotEmpty) {
       observations.add(
-          'A few reads were too unsure to act on: ${_joinLabels(flagged)}. '
-          'Tell me what they actually are and I will fold them in.');
+          '${_scanVocab.leads.next(kObservationLeads)} a few unsure '
+          'reads: ${_joinLabels(flagged)}. Tell me what they actually are '
+          'and I will fold them in.');
+      confirmationMarks.add(true);
     }
     if (notes.trim().isNotEmpty) {
       observations.add(
           'Your notes are in: the plan below also covers the things you '
           'described that the photos cannot show.');
+      confirmationMarks.add(false);
     }
     final Map<int, List<_RecognizedObject>> buckets =
         <int, List<_RecognizedObject>>{};
@@ -196,12 +227,16 @@ extension _ScanDrafting on _ScanFlowScreenState {
     }
     return _ScanPlan(
       observations: observations,
+      observationConfirmations: confirmationMarks,
       suggestions:
           suggestions.length > 4 ? suggestions.sublist(0, 4) : suggestions,
-      habits: const <String>[
+      habits: <String>[
         'One in, one out - a new item replaces an old one.',
         'Keep everyday things one touch away from where they are used.',
         'Clear the surface before you leave the room.',
+        '${_scanVocab.gates.next(kDanPhrases)}, '
+            '${_scanVocab.gates.next(kShaPhrases)}, '
+            '${_scanVocab.gates.next(kRiPhrases)}.',
       ],
       tidiness: total <= 2 ? 'tidy' : (total <= 8 ? 'moderate' : 'messy'),
     );

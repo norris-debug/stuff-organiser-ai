@@ -112,3 +112,27 @@ const List<String> _interjections = <String>[
   'Noted, next one.',
   'Okay, next.',
 ];
+
+/// v0.8.17: the per-scan vocabulary bundle - one no-repeat picker per
+/// wording role, all seeded from one scan seed so one conversation stays
+/// coherent while different scans read differently.
+class _CoachVocab {
+  _CoachVocab(this.seed)
+      : leads = VocabPicker(seed: seed + 2),
+        verbs = VocabPicker(seed: seed + 3),
+        asks = VocabPicker(seed: seed + 5),
+        gates = VocabPicker(seed: seed + 6);
+
+  /// The scan seed this bundle was built from.
+  final int seed;
+
+  final VocabPicker leads;
+  final VocabPicker verbs;
+  final VocabPicker asks;
+  final VocabPicker gates;
+}
+
+/// v0.8.17: the active scan's vocabulary bundle. Re-seeded at the start
+/// of every scan (scan_flow_analyze.dart) so each conversation rotates
+/// its own wording without repeating consecutive phrases.
+_CoachVocab _scanVocab = _CoachVocab(3);
