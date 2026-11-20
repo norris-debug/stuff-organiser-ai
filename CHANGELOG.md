@@ -2,6 +2,12 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.24+44 - 2026-11-20
+
+- Crown-fill wave (Leaf's path pack v2 rev 4 + anime variants v1-2): one hair-colored forehead fill per flagged character (twin tails, glasses boy, bob cut) closes the exposed-skin band between the fringe's top edge and the head silhouette - the measured gap boxes drop from 5,228 / 6,357 / 5,475 px² of exposed skin to zero, verified by pixel scan and clean on-camera renders at 1024px and 96px tiles (mid-gray background, tile-size read). The happy mouth overrides re-verified byte-exact against the variant pack; blindfolded's spiky silhouette stays untouched by design.
+- Badge fix (Meiosis R4-F1): the dashboard version label derives defensively - a version that already carries its build ("0.8.24+44") is used as-is and the build number is appended only when present, so the CI single-key version.json can no longer render a dangling trailing plus on web. A web-runtime-shaped badge test (version "0.8.23+43", buildNumber "") pins the format.
+- Semantics (Meiosis R4): the scan pick stage's disabled Next now carries an explicit Semantics enabled flag, so screen readers and automation see the enabled/disabled distinction at zero photos and while analysing.
+
 ## v0.8.23+43 - 2026-11-20
 
 - iOS web paste-dialog collapse fix: on focus, the keyboard-inset rebuild shrank the recognized-list field 8 -> 4 lines, hid every action button and slammed the dialog topCenter in the same frame - the next stray tap then landed on the dismiss barrier and closed the intake empty. The dialog now anchors topCenter permanently with keyboard-aware bottom padding (inset + 24 once the inset passes 48px), the field keeps its full 8-line height, and the Cancel / Skip / Coach-from-this actions never hide.
