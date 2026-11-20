@@ -1,9 +1,10 @@
 name: stuff_organiser_ai
+
 description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.22+42
+version: 0.8.23+43
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -34,27 +35,27 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# v0.8.5+25: coach chat drafts from the recognition lane's object list
+# v0.8.5: coach chat drafts from the recognition lane's object list
 # (paste intake on the interim route) instead of the canned demo script;
-# otter and cat whisker dots removed per the closed mascot ruling.
-# v0.8.6+26: web camera live preview survives every capture - the shared
+# outer and cat whisker dots removed per the closed mascot ruling.
+# v0.8.6: web camera live preview survives every capture - the shared
 # browser camera session is reused between shots (a fresh getUserMedia
 # right after a stop can serve a dead frame) and is fully released when
 # the scan flow closes.
-# v0.8.7+27: the recognized-object paste intake runs once per uploaded
+# v0.8.7: the recognized-object paste intake runs once per uploaded
 # photo (per-image reads from the recognition lane) and its dialog tracks
 # the iOS Safari keyboard (top-aligned + shrunk input while typing); the
-# chat photo bubble shows every uploaded angle as a labelled strip.
-# v0.8.8+28: mascots with traced geometry render from Leaf's locked path
+# chat photo bubble shows every uploaded angle as a labeled strip.
+# v0.8.8: mascots with traced geometry render from Leaf's locked path
 # pack v1 through the shared traced renderer (single locked expression
-# per character; mood variants fast-follow); legacy code-painted mascots
+# per character; mood variants fast-follow). legacy code-painted mascots
 # moved unchanged to mascot_painters_legacy.dart.
-# v0.8.9+29: coach confirmation replies - the chat shows a reply bar at
+# v0.8.9: coach confirmation replies - the chat shows a reply bar at
 # the verify/flagged confirmation points and the answer lands inline;
-# result-page buttons equalized (both FilledButton.icon); the recognized-
-# object paste dialog hides its buttons while the keyboard is up so the
-# input box keeps its height; the anime three (twin tails, glasses boy,
-# bob cut) replace the ninja/idol/mage alternates with Leaf's traced art
+# result buttons equalized (both FilledButton.icon); the recognized-
+# object paste dialog hides its buttons while the keyboard is up so
+# the input box keeps its height; the animated three (twin tails, glasses boy,
+# bob cut) replace the ninja/idle/mage alternates with Leaf's traced art
 # (saved selections migrate to the pack default automatically).
 # v0.8.10+30: mascot polish wave - all 15 mascots render from Leaf's
 # path pack v2 (revision 2): animal head bases are true circles at tile
@@ -66,8 +67,8 @@ flutter:
 # v0.8.11+31: the Paste Recognized List button is gone from the coach
 # chat action row - paste survives as a quiet inline link inside the
 # waiting bubble (gated on the awaiting-recognition state), so a scan
-# still can't dead-end while the interim manual route lasts. The
-# result-stage UI members split into scan_flow_ui2b.dart to keep every
+# can't dead-end while the interim manual route lasts. The
+# result-stage UI members split into scan_flow_ui2.dart to keep every
 # scan library file push- and verify-sized.
 # v0.8.12+32: the idle+happy mascot variant wave - all 15 traced
 # mascots gained a happy mood from Leaf's override packs (animals,
@@ -92,20 +93,20 @@ flutter:
 # every scanned venue auto-adds to "Your spaces" and its recognized
 # confirmed/verify objects land as unpacked items on the venue's page
 # (flagged reads stay out); first runs start with an empty home (the demo
-# seed is gone); coach interjections and the notes echo render as coach
+# seed is gone); coach interactions and the notes echo render as coach
 # bubbles; onboarding is double-tap guarded; whitespace-only renames are
 # rejected in the state layer; corrupt plan stores are reported honestly on
 # both the save side and the Plan tab; the venue page goes multi-select with
 # a "Finish organizing" bottom button (three-dots delete gone) and tappable
 # "Drop in [venue]" chips; the dashboard badge derives from package
-# metadata (package_info_plus); docs corrected (photo count, mess scaling,
+# metadata (package_info_plus); docs corrected (photo count, message scaling,
 # Settings About, PWA manifest, page title).
 # v0.8.17+37: coach vocabulary variety (Norris directive) + the scan-to-
 # email forward action (Lane 2, Cellulose's receive lane verified end to
 # end): the plan drafter, the bucket suggestions and the chat assembly now
 # rotate wording through a per-scan seeded no-repeat vocabulary bundle
 # (rotating openers, varied lead-ins, confirmation questions, discard
-# phrasings, Dan/Sha/Ri phrasings) so two scans never read alike while one
+# phrasing, Dan/Sha/Ri phrasings) so two scans never read alike while one
 # conversation stays coherent; the Danshari method is untouched. Coach
 # confirmation points are flagged structurally via a parallel list instead
 # of matched by fixed opening words. The forward action lands in the scan
@@ -115,20 +116,19 @@ flutter:
 # sheet where it supports files and a mailto fallback where it does not,
 # and the flow ends on the "package sent" labeling so nothing spins.
 # v0.8.18+38: R2-01 race fix (the plan save reads a snapshot handed in by
-# the caller, so a flow reset racing the side effects can no longer turn
-# the save into a silent no-op) plus the functional test gate: real
+# the caller, so a flow reset racing the save side-effects can no longer
+# turn the save into a silent no-op) plus the functional test gate: real
 # widget tests for the badge-from-package-metadata, the Plan tab storage
 # contract (stored parts render, empty first run, honest corrupt banner),
 # the duplicate-space guard and the full scan->plan integration (paste
-# recognition -> save + venue auto-add + unpacked items, flagged reads
-# out). image_picker_platform_interface rides as a dev dependency for the
-# picker double used by the integration test.
+# recognition -> save -> venue auto-add -> unpacked items). image_picker_platform_interface
+# rides as a dev dependency for the picker double used by the integration test.
 # v0.8.19+39: the forward action opens pre-addressed - the web mailto
 # compose carries afantashoon@gmail.com as the recipient and the in-app
 # labeling names the destination (the APK share path cannot prefill a
 # recipient, so the hint covers it); README documents the lane. Plus the
-# R3-F1 fix: the scan save mirrors the Plan tab's cast, so a valid-JSON-
-# but-non-List store reports the honest corrupt banner on both sides
+# R3-F1 fix: the scan save mirrors the Plan tab's cast, so a valid-JSON
+# but non-List store reports the honest corrupt banner on both sides
 # instead of being silently overwritten - pinned by two new widget tests
 # (Plan tab non-List banner + scan-side no-overwrite).
 # v0.8.20+40: semantics test mode - main() forces the accessibility
@@ -152,3 +152,10 @@ flutter:
 # are redrawn as single smooth arcs; the scallop rhythm that still read
 # as sawtooth at 96px grid-tile size is gone. Happy mouth overrides
 # untouched; idle variants byte-identical to the new base.
+# v0.8.23+43: iOS paste-box collapse fix. The paste dialog was using
+# inset > 0 to detect the keyboard, which triggered on every tiny
+# inset change and immediately: (a) shrank the field from 8 to 4
+# lines, (b) hid ALL action buttons, (c) slammed the dialog to
+# topCenter. Now: threshold is 48px (real keyboard is ~300+px on
+# iOS), maxLines stays at 8, actions never hide, and insetPadding
+# pushes the dialog up when the keyboard is up.
