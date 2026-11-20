@@ -134,21 +134,29 @@ extension _ScanPickUi on _ScanFlowScreenState {
               ),
             ),
             const SizedBox(width: 10),
-            // v0.8.24 (Meiosis R4) / v0.8.26 (Meiosis R6-F2): the disabled
-            // Next must expose role + enabled state in ONE semantics node -
-            // a bare parent wrap lands them on separate nodes, so web
-            // automation reads neither as aria-disabled. container:true
-            // merges the button's own semantics (role + label) into this
-            // node.
-            Semantics(
-              container: true,
-              button: true,
+            // v0.8.27 (Meiosis R6-F2 + R7-F1): the disabled Next exposes
+            // role + label + enabled state through ONE render-level node -
+            // the level the web engine actually reads. The widget-level
+            // paths (the v0.8.24-0.8.26 Semantics wraps AND Material's own
+            // native-disabled button node) never produce the enabled-state
+            // flag on this Flutter web build, so neither could ever
+            // serialize as aria-disabled, and the 0.8.26 wrapper
+            // serialized as a second same-labeled button node.
+            // SoaiSemanticsButton owns the boundary at render level;
+            // ExcludeSemantics drops the inner button's node so exactly
+            // one accessible control remains. The visible onPressed guard
+            // still blocks navigation at zero photos / while analysing.
+            SoaiSemanticsButton(
+              label: _analyzing ? 'Analysing...' : 'Next',
               enabled: !_analyzing && hasPhotos,
-              child: FilledButton.icon(
-                onPressed:
-                    (_analyzing || !hasPhotos) ? null : _confirmAndAnalyse,
-                icon: const Icon(Icons.task_alt),
-                label: Text(_analyzing ? 'Analysing...' : 'Next'),
+              onTap: (_analyzing || !hasPhotos) ? null : _confirmAndAnalyse,
+              child: ExcludeSemantics(
+                child: FilledButton.icon(
+                  onPressed:
+                      (_analyzing || !hasPhotos) ? null : _confirmAndAnalyse,
+                  icon: const Icon(Icons.task_alt),
+                  label: Text(_analyzing ? 'Analysing...' : 'Next'),
+                ),
               ),
             ),
           ],
