@@ -15,7 +15,9 @@ part 'app_state_items.dart';
 /// Owns the signed-in user, the spaces and items of the current account and
 /// the locally persisted preferences (theme pack, mascot, onboarding flag).
 /// The item mutations live in app_state_items.dart (part file, same
-/// library) to keep every file push- and verify-sized.
+/// library) to keep every file push- and verify-sized; they are reached
+/// through the AppStateItemOps extension, and rebroadcast() gives that
+/// part file the notifyListeners hook it cannot call directly.
 class AppState extends ChangeNotifier {
   AppState({
     required this.authService,
@@ -232,6 +234,12 @@ class AppState extends ChangeNotifier {
   Future<void> resetDemoData() async {
     await dataService.clearDemoData();
     await _reload();
+    notifyListeners();
+  }
+
+  /// v0.8.16: notifyListeners hook for the item-ops part file - extensions
+  /// cannot call the protected member directly, so they call this instead.
+  void rebroadcast() {
     notifyListeners();
   }
 
