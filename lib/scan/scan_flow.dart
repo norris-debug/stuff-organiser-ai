@@ -10,6 +10,9 @@ import 'package:permission_handler/permission_handler.dart' as permissions;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as speech;
 
+import '../models/item.dart';
+import '../state/app_state.dart';
+import '../state/app_state_spaces.dart';
 import '../theme/app_theme.dart';
 import '../widgets/mascot_widget.dart';
 import 'web_camera.dart';
@@ -41,17 +44,26 @@ part 'scan_flow_loader.dart';
 /// v0.8.5: the coach drafts from the recognition lane's object list
 /// instead of the canned demo script, so the dialogue follows the
 /// photos that were actually taken.
+/// v0.8.16: the scan's leave-behinds run the moment the result page
+/// opens - the tidy plan auto-saves (closing the tab can no longer lose
+/// suggestions), the scanned venue auto-adds to "Your spaces" and the
+/// recognized objects land as unpacked items on the venue's page.
 class ScanFlowScreen extends StatefulWidget {
   const ScanFlowScreen({
     super.key,
     required this.prefs,
     required this.mascot,
     required this.pack,
+    required this.appState,
   });
 
   final SharedPreferences prefs;
   final MascotVariant mascot;
   final ThemePack pack;
+
+  /// v0.8.16: the venue auto-add and the recognized-item handoff write
+  /// through the shared app state.
+  final AppState appState;
 
   @override
   State<ScanFlowScreen> createState() => _ScanFlowScreenState();
@@ -97,6 +109,11 @@ class _Suggestion {
   final String detail;
   final List<String> steps;
 }
+
+/// v0.8.16 (TC-11): outcomes of saving the tidy plan, so the messaging
+/// can tell "nothing to save" apart from "the stored plan data is
+/// unreadable".
+enum _SaveResult { saved, empty, corrupt }
 
 /// The full result of one scan.
 class _ScanPlan {
@@ -170,6 +187,15 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
 
   /// v0.8.5: true while the coach chat waits for the recognized list.
   bool _awaitingRecognition = false;
+
+  /// v0.8.16: the recognized objects of this scan, merged across every
+  /// uploaded angle. They land as unpacked items on the venue's page
+  /// when the result opens.
+  List<_RecognizedObject> _recognized = <_RecognizedObject>[];
+
+  /// v0.8.16: the scan's leave-behinds run exactly once, when the result
+  /// page opens.
+  bool _scanSideEffectsDone = false;
 
   /// v0.8.9: coach confirmation replies. The reply bar shows when the
   /// latest revealed line asks the user to confirm or correct something;
@@ -274,35 +300,24 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     );
   }
 
-  /// v0.7: the result-stage back arrow discards the suggestions without
-  /// saving and returns to the home shell.
+  /// v0.7: the result-stage back arrow returns to the home shell.
+  /// v0.8.16 (TC-23): the plan auto-saves when the result page opens, so
+  /// the back arrow can no longer discard suggestions - closing the tab
+  /// keeps everything the scan produced.
   void _discardAndHome() {
     Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
   }
 
-  /// v0.7: 'Return to homepage' saves the suggestions into the Tidy Plan
-  /// tab first, then pops back to the home shell.
-  Future<void> _saveThenHome() async {
-    await _savePlanToTidyList();
-    if (!mounted) return;
+  /// v0.8.16 (TC-23): the plan is already saved by the time the result
+  /// page shows, so returning home only navigates.
+  void _saveThenHome() {
     _discardAndHome();
   }
 
-  /// v0.7: 'Scan another room' saves first, then starts a fresh round.
-  Future<void> _saveThenNewRound() async {
-    final bool saved = await _savePlanToTidyList();
-    if (!mounted) return;
+  /// v0.8.16 (TC-23): same as above - the save happened at result entry,
+  /// so starting a fresh round only resets the flow.
+  void _saveThenNewRound() {
     _resetFlow();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          saved
-              ? 'Saved to the Tidy Plan tab'
-              : 'Nothing to save - new round started',
-        ),
-      ),
-    );
   }
 
   /// v0.7: appends the coach's suggestions to the Tidy Plan tab as a new
@@ -316,8 +331,8 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     return 't${DateTime.now().microsecondsSinceEpoch}-$_scanIdCounter';
   }
 
-  Future<bool> _savePlanToTidyList() async {
-    if (_plan.suggestions.isEmpty) return false;
+  Future<_SaveResult> _savePlanToTidyList() async {
+    if (_plan.suggestions.isEmpty) return _SaveResult.empty;
     final SharedPreferences prefs = widget.prefs;
     final String raw = prefs.getString(_tidyPlanStorageKey) ?? '';
     List<dynamic> parts;
@@ -329,8 +344,10 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
         parts = <dynamic>[];
       }
     } catch (_) {
-      // Corrupt store: never overwrite existing data with a partial save.
-      return false;
+      // v0.8.16 (TC-11): a corrupt store is reported, never silently
+      // treated as "nothing to save" - and never overwritten with a
+      // partial save.
+      return _SaveResult.corrupt;
     }
     final String venue = _scanVenue;
     final String partName = venue.isNotEmpty ? venue : 'Scanned space';
@@ -356,7 +373,7 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
       'tasks': tasks,
     });
     await prefs.setString(_tidyPlanStorageKey, jsonEncode(parts));
-    return true;
+    return _SaveResult.saved;
   }
 
   void _resetFlow() {
@@ -377,6 +394,8 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
       _error = null;
       _analyzing = false;
       _awaitingRecognition = false;
+      _recognized = <_RecognizedObject>[];
+      _scanSideEffectsDone = false;
       _chatReplyController.clear();
       _answeredConfirmations.clear();
     });
