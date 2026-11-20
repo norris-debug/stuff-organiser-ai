@@ -202,6 +202,12 @@ void main() {
     await tester.pump();
 
     expect(find.text('Paste recognized list'), findsOneWidget);
+    // The waiting bubble is a lazy ListView too: the paste action can sit
+    // outside the visible viewport while still built inside the cache
+    // extent, and the tap at the reported center then lands on the scroll
+    // surface instead of the button (run #174). Bring it on-screen first.
+    await tester.ensureVisible(find.text('Paste recognized list'));
+    await tester.pump();
     await tester.tap(find.text('Paste recognized list'));
     // Mascots in the chat bubbles behind the dialog repeat forever, so
     // pumpAndSettle can never settle - pump the dialog open instead.
