@@ -117,6 +117,9 @@ class RenderSoaiSemanticsButton extends RenderProxyBox {
     config.isSemanticBoundary = true;
     config.isButton = true;
     config.label = _label;
+    // A non-empty label must carry its direction: SemanticsData asserts
+    // textDirection != null whenever the label is non-empty (run #229).
+    config.textDirection = TextDirection.ltr;
     // Non-null = the node carries the enabled-state flag - what the web
     // engine reads to emit aria-disabled="true" while disabled.
     config.isEnabled = _enabled;
