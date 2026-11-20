@@ -1,8 +1,9 @@
 part of 'plan_screen.dart';
 
 /// v0.8.16: the plan tab's dialogs and view builders split into a part
-/// file so every file stays push- and verify-sized. Behavior is unchanged
-/// except where noted.
+/// file so every file stays push- and verify-sized. State changes route
+/// through _PlanScreenState.replan() because extensions cannot touch the
+/// protected setState member.
 extension _PlanScreenViews on _PlanScreenState {
   Future<void> _renamePart(TidyPart part) async {
     final TextEditingController controller = TextEditingController(text: part.name);
@@ -40,7 +41,7 @@ extension _PlanScreenViews on _PlanScreenState {
     if (!mounted) {
       return;
     }
-    setState(() {
+    replan(() {
       part.name = newName;
     });
     await _persist();
@@ -69,7 +70,7 @@ extension _PlanScreenViews on _PlanScreenState {
     if (confirmed != true || !mounted) {
       return;
     }
-    setState(() {
+    replan(() {
       _parts.removeWhere((TidyPart candidate) => candidate.id == part.id);
       _expandedParts.remove(part.id);
     });
@@ -114,7 +115,7 @@ extension _PlanScreenViews on _PlanScreenState {
       return;
     }
     final TidyPart part = TidyPart(id: _newId(), name: name, tasks: <TidyTask>[]);
-    setState(() {
+    replan(() {
       _parts.add(part);
       _expandedParts.add(part.id);
     });
@@ -127,7 +128,7 @@ extension _PlanScreenViews on _PlanScreenState {
     if (text.isEmpty) {
       return;
     }
-    setState(() {
+    replan(() {
       part.tasks.add(TidyTask(id: _newId(), text: text));
     });
     controller?.clear();
@@ -137,7 +138,7 @@ extension _PlanScreenViews on _PlanScreenState {
   Future<void> _deleteTask(TidyTask task) async {
     for (final TidyPart part in _parts) {
       if (part.tasks.contains(task)) {
-        setState(() {
+        replan(() {
           part.tasks.remove(task);
         });
         break;
@@ -176,7 +177,7 @@ extension _PlanScreenViews on _PlanScreenState {
     if (picked == null || !mounted) {
       return;
     }
-    setState(() {
+    replan(() {
       _arrowId = picked;
     });
     await _persist();
@@ -193,7 +194,7 @@ extension _PlanScreenViews on _PlanScreenState {
           InkWell(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
             onTap: () {
-              setState(() {
+              replan(() {
                 if (expanded) {
                   _expandedParts.remove(part.id);
                 } else {
@@ -287,7 +288,7 @@ extension _PlanScreenViews on _PlanScreenState {
       children: <Widget>[
         InkWell(
           onTap: () {
-            setState(() {
+            replan(() {
               if (open) {
                 _expandedTasks.remove(task.id);
               } else {
@@ -302,7 +303,7 @@ extension _PlanScreenViews on _PlanScreenState {
                 Checkbox(
                   value: task.done,
                   onChanged: (bool? value) {
-                    setState(() {
+                    replan(() {
                       task.done = value ?? false;
                     });
                     _persist();
