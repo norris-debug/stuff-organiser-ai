@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.11+31
+version: 0.8.12+32
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -65,3 +65,8 @@ flutter:
 # still can't dead-end while the interim manual route lasts. The
 # result-stage UI members split into scan_flow_ui2b.dart to keep every
 # scan library file push- and verify-sized.
+# v0.8.12+32: the idle+happy mascot variant wave - all 15 traced
+# mascots gained a happy mood from Leaf's override packs (animals,
+# food, anime): the renderer swaps exactly the mouth shape(s) per
+# mascot via mascot_happy_overrides.dart while idle (and every other
+# mood) keeps the byte-verified v2 base geometry.
