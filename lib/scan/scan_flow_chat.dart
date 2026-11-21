@@ -75,17 +75,26 @@ extension _ScanChatFlow on _ScanFlowScreenState {
 
   String _introLine() {
     final _ScanPlan plan = _plan;
-    final String where = plan.hasSetting ? plan.setting : 'this space';
+    // v0.8.28 (R7-F2 copy): the venue fallback carried its own article
+    // inside the shared 'Looking at the $where' template, so an empty
+    // venue read "Looking at the this space". The article moves into the
+    // value: a named venue renders 'the Living room', an empty one
+    // renders 'your space'.
+    final String where =
+        plan.hasSetting ? 'the ${plan.setting}' : 'your space';
     final int count = plan.suggestions.length;
     // v0.8.17: the intro opens with a rotating opener from the scan's
     // vocabulary bundle, so consecutive scans never start alike.
     final String opener = _scanVocab.openers.next(kCoachOpeners);
     if (plan.hasTidiness) {
-      return '$opener Looking at the $where, I would call it '
-          '${_titleCase(plan.tidiness)}. Here are $count concrete actions, '
-          'each one something you can do with your hands right now.';
+      // v0.8.28 (QA R8-F5): 'tidy' always pairs with 2 actions (total
+      // <= 2 -> wanted = 2), so the generic hands-on tail read as a
+      // contradiction - the tidy case gets its own tail.
+      return '$opener Looking at $where, I would call it '
+          '${_titleCase(plan.tidiness)}. Here are $count concrete actions'
+          '${plan.tidiness == 'tidy' ? ' to keep it that way' : ', each one something you can do with your hands right now'}.';
     }
-    return '$opener Looking at the $where, here is what I would tackle '
+    return '$opener Looking at $where, here is what I would tackle '
         'and the $count concrete actions for it.';
   }
 
