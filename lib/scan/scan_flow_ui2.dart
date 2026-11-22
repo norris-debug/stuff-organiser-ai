@@ -35,8 +35,17 @@ extension _ScanChatResultUi on _ScanFlowScreenState {
             controller: _chatScroll,
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             itemCount: visible.length,
-            itemBuilder: (BuildContext context, int index) =>
-                _bubble(context, visible[index]),
+            itemBuilder: (BuildContext context, int index) => Semantics(
+              // v0.8.28 (R7-F2 retarget): the reveal sequence carries
+              // the live region - run #20 measured the coach output as
+              // tap-gated (lines built instantly, no multi-minute
+              // wait), so the plan is announced line by line as Next
+              // reveals it. The flag rides only the newest revealed
+              // line: each tap announces exactly one new line and
+              // older nodes never re-announce.
+              liveRegion: index == visible.length - 1,
+              child: _bubble(context, visible[index]),
+            ),
           ),
         ),
         SafeArea(
