@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.30+50
+version: 0.8.31+51
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -157,12 +157,12 @@ flutter:
 # v0.8.23+43: iOS web paste-dialog collapse fix - the paste dialog
 # anchors topCenter with keyboard-aware bottom padding, the field keeps
 # its 8-line height on focus, and the action row never hides.
-# v0.8.24+44: crown-fill wave (Leaf path pack v2 rev 4 + variants v1-2) -
-# one hair-colored forehead fill per flagged anime character closes the
-# skin band above the fringe; the dashboard badge renders defensively
-# against the CI single-key version.json (no dangling trailing plus, with
-# a web-runtime fixture test); the scan pick stage's disabled Next carries
-# an explicit semantics enabled flag.
+# v0.8.24+44: crown-fill wave (Leaf path pack v2 rev 4 + variants
+# v1-2) - one hair-colored forehead fill per flagged anime character
+# closes the skin band above the fringe; the dashboard badge renders
+# defensively against the CI single-key version.json (no dangling
+# trailing plus, with a web-runtime fixture test); the scan pick stage's
+# disabled Next carries an explicit semantics enabled flag.
 # v0.8.25+45: QA sample-photos affordance - with the ?semantics=1 test
 # mode on, the scan pick stage shows a debug-only "Load sample photos"
 # button that appends two bundled sample photos to the queue, so
@@ -208,4 +208,4 @@ flutter:
 # wraps home in main.dart), so startup work and the dashboard tests
 # stay untouched; white stays the staged default - the mint swap is one
 # asset + hex change; a widget test pins the gate contract (hold
-# timing, tap-skip release, child from frame one).
+# timing, tap-skip release, child from frame one)."
