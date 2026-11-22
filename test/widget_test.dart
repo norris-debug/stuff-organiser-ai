@@ -271,6 +271,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 750));
     }
 
+    // v0.8.28 (R7-F2 copy): a named venue keeps its article - 'the Bedroom'.
+    expect(find.textContaining('Looking at the Bedroom'), findsOneWidget);
+
     // Finishing the reveal auto-flows into the result page, which runs the
     // scan's leave-behinds: plan save, venue auto-add, item landing.
     await tester.pump(const Duration(milliseconds: 1000));
@@ -378,5 +381,119 @@ void main() {
     // The corrupt store must survive untouched - an overwrite here would
     // mean the save silently replaced unreadable content.
     expect(prefs.getString('tidy_plan_todo_v1'), '{"a":1}');
+  });
+
+  testWidgets(
+      'scan flow: empty venue intro reads clean and the reveal announces line by line (R7-F2)',
+      (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final AppState state = _demoState(prefs);
+
+    ImagePickerPlatform.instance = _FakeImagePicker(<XFile>[
+      XFile.fromData(
+        base64Decode(_kPng1x1),
+        name: 'photo-1.jpg',
+        mimeType: 'image/jpeg',
+      ),
+    ]);
+
+    await tester.pumpWidget(_host(
+      ScanFlowScreen(
+        prefs: prefs,
+        mascot: MascotVariant.bunny,
+        pack: themePacks.first,
+        appState: state,
+      ),
+    ));
+    await tester.pump();
+
+    // No venue chip tapped - the venue input stays empty on purpose.
+    await tester.tap(find.text('Gallery'));
+    await tester.pump();
+    await tester.scrollUntilVisible(
+      find.text('Next'),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Paste recognized list'));
+    await tester.pump();
+    await tester.tap(find.text('Paste recognized list'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // v0.8.28 (QA R8-F4): six items packed onto ONE line - the shape
+    // that used to be silently chopped to its first 60 characters.
+    await tester.enterText(
+      find.byType(TextField),
+      'loose papers - 92%, red scarf - 75%, old magazine - 55%, '
+          'coffee mug - 90%, desk lamp - 80%, red notebook - 65%',
+    );
+    await tester.tap(find.text('Coach from this'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Run #20 measured: no wait, no drafting status - tap-gated reveal.
+    expect(find.textContaining('drafting'), findsNothing);
+
+    // One Next tap reveals the intro: the empty-venue fallback reads
+    // clean - never "the this space" - and the newest line announces.
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 750));
+    expect(find.textContaining('Looking at your space'), findsOneWidget);
+    expect(find.textContaining('the this space'), findsNothing);
+    expect(
+      find.ancestor(
+        of: find.textContaining('Looking at your space'),
+        matching: find.byWidgetPredicate(
+          (Widget w) => w is Semantics && (w.properties.liveRegion ?? false),
+        ),
+      ),
+      findsOneWidget,
+    );
+
+    int revealGuard = 0;
+    while (find.text('Next').evaluate().isNotEmpty) {
+      revealGuard++;
+      if (revealGuard > 40) {
+        break;
+      }
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
+    }
+
+    // R8-F4 pin: the LAST pasted item reads in the coach output - the
+    // one-line paste was never chopped to 60 characters. 'desk lamp and
+    // red notebook' is the verify-tier join and appears exactly once
+    // (the bucket-0 suggestion title reads 'loose papers and red
+    // notebook', which never pairs with 'desk lamp').
+    expect(
+      find.textContaining('desk lamp and red notebook'),
+      findsOneWidget,
+    );
+
+    // The live region follows the newest line: the closing line
+    // announces before the 900 ms handoff opens the result page.
+    expect(
+      find.ancestor(
+        of: find.textContaining('That is the whole plan'),
+        matching: find.byWidgetPredicate(
+          (Widget w) => w is Semantics && (w.properties.liveRegion ?? false),
+        ),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
   });
 }
