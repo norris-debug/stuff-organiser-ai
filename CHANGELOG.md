@@ -2,6 +2,11 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.31+51 - 2026-11-22
+
+- Mascot wave (Leaf's path pack v2 rev 6 + anime variants v1-4, cumulative - they supersede rev 5 / variants v1-3): the five anime mascots rebuild from the rev 6 pack - the straw hat's under-hat hair re-clipped so no hair shows above the hat silhouette, the blindfolded character's blindfold thickened with the hair-white half fill, and the twin-tails / glasses-boy / bob-cut crowns raised; idle and happy variants rebuild from the new base with only the mouth overrides on top.
+- Wiring: the 13 rev 6 chunk files (straw-hat clip, blindfolded appends, twin-tails P1+P2, glasses-boy P1+P2+P3, bob-cut P1+P2) concatenate into the full crown/hair path strings in the anime pack library - every chunk and the wiring commit verified bit-exact against the pack (stored blob shas + size accounting), all untouched mascot rows preserved.
+
 ## v0.8.30+50 - 2026-11-22
 
 - Opening screen: the app now opens on the team logo splash - the keyed logo on white holds about 2.2 seconds, tap to skip, and the dashboard builds from frame one beneath the overlay so the skip lands instantly (design: Leaf's comp set, wired per the handoff).
