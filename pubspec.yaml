@@ -1,4 +1,4 @@
-name: stuff_organiser_ai
+stuff_organiser_ai
 description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
@@ -33,6 +33,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/branding/logo.png
 
 # v0.8.5+25: coach chat drafts from the recognition lane's object list
 # (paste intake on the interim route) instead of the canned demo script;
@@ -119,7 +121,7 @@ flutter:
 # the save into a silent no-op) plus the functional test gate: real
 # widget tests for the badge-from-package-metadata, the Plan tab storage
 # contract (stored parts render, empty first run, honest corrupt banner),
-# the duplicate-space guard and the full scan->plan integration (paste
+# the duplicate-space_guard and the full scan->plan integration (paste
 # recognition -> save + venue auto-add + unpacked items, flagged reads
 # out). image_picker_platform_interface rides as a dev dependency for the
 # picker double used by the integration test.
