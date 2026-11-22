@@ -459,8 +459,12 @@ void main() {
       findsOneWidget,
     );
 
+    // Reveal until the CLOSING line is on screen (bounded). Exiting on
+    // Next's disappearance alone raced the final tap in run #238 - the
+    // asserts below need the closing line actually revealed.
     int revealGuard = 0;
-    while (find.text('Next').evaluate().isNotEmpty) {
+    while (find.textContaining('That is the whole plan').evaluate().isEmpty &&
+        find.text('Next').evaluate().isNotEmpty) {
       revealGuard++;
       if (revealGuard > 40) {
         break;
@@ -469,6 +473,13 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 750));
     }
+    // One settle frame so the post-frame scroll lands the newest bubble
+    // inside the built viewport before the asserts read it.
+    await tester.pump();
+
+    // The closing line must be on screen before the 900 ms handoff - the
+    // live-region assert below reads it as the newest revealed line.
+    expect(find.textContaining('That is the whole plan'), findsOneWidget);
 
     // R8-F4 pin: the LAST pasted item reads in the coach output - the
     // one-line paste was never chopped to 60 characters. 'desk lamp and
