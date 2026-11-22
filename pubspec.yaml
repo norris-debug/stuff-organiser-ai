@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.28+48
+version: 0.8.29+49
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -192,3 +192,9 @@ flutter:
 # "Tidy" with its own tail ("Here are N concrete actions to keep it
 # that way.") instead of the hands-on actions tail (QA R8-F5; the
 # severity word itself is input-gated by item count and unchanged).
+# v0.8.29+49: route B transport (steward ruling) - the scan forward's
+# email package carries BOTH processing lanes in one send: the coach's
+# receive mailbox (renders + the recognized item list) and Chlorophyll's
+# recognition mailbox (the tiered read). The mailto fallback
+# pre-addresses both; the share-sheet and clipboard labeling name both;
+# the payload format and the subject pattern are unchanged.
