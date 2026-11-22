@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.27+47
+version: 0.8.28+48
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -178,3 +178,17 @@ flutter:
 # duplicating the accessible control (Meiosis R6-F2 + R7-F1; the
 # widget-level enabled paths never serialize the flag on this Flutter
 # web build). Live ARIA verification rides the R8 targeted pass.
+# v0.8.28+48: coach-chat a11y + intake + copy wave - the tidy-plan
+# reveal announces itself (each newly revealed coach line carries a
+# live region, so screen readers hear the plan build line by line as
+# Next is tapped; R7-F2 retargeted to the measured tap-gated reveal
+# path after run #20 measured no wait anywhere - the staging-only
+# "coach is drafting" status was dropped); the empty-venue intro reads
+# "Looking at your space" instead of "Looking at the this space"
+# (R7-F3); paste intake splits comma/semicolon one-line lists into
+# real items before the plan drafts - the old per-label 60-character
+# cap silently chopped such lines to their first 60 characters and
+# every item past it was dropped (QA R8-F4); the tidy intro pairs
+# "Tidy" with its own tail ("Here are N concrete actions to keep it
+# that way.") instead of the hands-on actions tail (QA R8-F5; the
+# severity word itself is input-gated by item count and unchanged).
