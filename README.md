@@ -67,18 +67,22 @@ demo mode. The old optional Gemini-key route was retired from the pipeline
 
 ## Scan forward lane (email)
 
-App-user scans reach the recognition lane by email while the automated
-transport is pending. After uploading a scan, the waiting bubble offers
-"Forward scan by email": the package carries the photos in upload order (with
-a body line pinning the order), the venue and the typed notes, and the scan ID
-names the subject line ("Stuff Organiser scan <id>").
+App-user scans reach both processing lanes by email (route B - the scan pushes
+to the lanes the moment the package is sent). After uploading a scan, the
+waiting bubble offers "Forward scan by email": the package carries the photos
+in upload order (with a body line pinning the order), the venue and the typed
+notes, and the scan ID names the subject line ("Stuff Organiser scan <id>").
 
-- The web compose opens pre-addressed to **afantashoon@gmail.com** — the
-  coach's receive mailbox. Attach the photos in upload order and send.
+- The package rides to BOTH processing lanes in one send: the web compose opens
+  pre-addressed to **afantashoon@gmail.com** (the coach's receive mailbox -
+  renders and the recognized item list) and **chlorophyll@hellominds.ai** (the
+  recognition mailbox - the tiered read). Attach the photos in upload order
+  and send.
 - On Android, the native share sheet carries the photos as attachments; the
-  in-app hint names the destination address to send to.
-- The mailbox watches for subjects beginning with "Stuff Organiser scan";
-  the organized renders and the recognized item list arrive back by email.
+  in-app hint names both destination addresses to send to.
+- The mailboxes watch for subjects beginning with "Stuff Organiser scan"; the
+  organized renders and the recognized item list arrive back by email, and the
+  recognition lane returns the tiered read for the same scan.
 
 ## Firebase (optional, for real accounts)
 
