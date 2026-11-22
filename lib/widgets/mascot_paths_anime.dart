@@ -49,7 +49,7 @@ const String kAnimeBobCutHairD =
 /// anime_straw_hat rev 6: row 0 (the hair mass) re-clipped to sit
 /// under the hat silhouette; every other row byte-identical to the
 /// shipped base.
-const List<MascotShapeRow> kTracedStrawHatR6 = <MascotShapeRow>[
+final List<MascotShapeRow> kTracedStrawHatR6 = <MascotShapeRow>[
   MascotShapeRow('#4A3230', 1.0, kAnimeStrawHatHairD),
   kTracedStrawHat[1],
   kTracedStrawHat[2],
@@ -70,7 +70,7 @@ const List<MascotShapeRow> kTracedStrawHatR6 = <MascotShapeRow>[
 /// anime_twin_tails rev 6: row 17 (the rev-4 crown band) replaced by
 /// the dense hair-crown lobe set; rows 0-16 byte-identical to the
 /// shipped base.
-const List<MascotShapeRow> kTracedTwinTailsR6 = <MascotShapeRow>[
+final List<MascotShapeRow> kTracedTwinTailsR6 = <MascotShapeRow>[
   kTracedTwinTails[0],
   kTracedTwinTails[1],
   kTracedTwinTails[2],
@@ -94,7 +94,7 @@ const List<MascotShapeRow> kTracedTwinTailsR6 = <MascotShapeRow>[
 /// anime_glasses_boy rev 6: row 16 (the rev-4 crown band) replaced by
 /// the dense hair-crown clip; rows 0-15 byte-identical to the shipped
 /// base.
-const List<MascotShapeRow> kTracedGlassesBoyR6 = <MascotShapeRow>[
+final List<MascotShapeRow> kTracedGlassesBoyR6 = <MascotShapeRow>[
   kTracedGlassesBoy[0],
   kTracedGlassesBoy[1],
   kTracedGlassesBoy[2],
@@ -117,7 +117,7 @@ const List<MascotShapeRow> kTracedGlassesBoyR6 = <MascotShapeRow>[
 /// anime_bob_cut rev 6: row 16 (the rev-4 crown fill band) replaced
 /// by the dense hair-crown clip; rows 0-15 byte-identical to the
 /// shipped base.
-const List<MascotShapeRow> kTracedBobCutR6 = <MascotShapeRow>[
+final List<MascotShapeRow> kTracedBobCutR6 = <MascotShapeRow>[
   kTracedBobCut[0],
   kTracedBobCut[1],
   kTracedBobCut[2],
@@ -140,7 +140,7 @@ const List<MascotShapeRow> kTracedBobCutR6 = <MascotShapeRow>[
 /// anime_blindfolded rev 6: two appended rows on top of the shipped
 /// base (thickened blindfold band + hair-white half fill); rows 0-11
 /// byte-identical to the shipped base.
-const List<MascotShapeRow> kTracedBlindfoldedR6 = <MascotShapeRow>[
+final List<MascotShapeRow> kTracedBlindfoldedR6 = <MascotShapeRow>[
   kTracedBlindfolded[0],
   kTracedBlindfolded[1],
   kTracedBlindfolded[2],

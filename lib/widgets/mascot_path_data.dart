@@ -6,9 +6,6 @@ import 'mascot_paths_2.dart';
 import 'mascot_paths_3.dart';
 import 'mascot_paths_4.dart';
 import 'mascot_paths_5.dart';
-import 'mascot_paths_6.dart';
-import 'mascot_paths_7.dart';
-import 'mascot_paths_8.dart';
 import 'mascot_paths_anime.dart';
 
 class MascotShapeRow {
@@ -119,7 +116,7 @@ void paintMascotTraced(
   canvas.restore();
 }
 
-const Map<String, List<MascotShapeRow>> kTracedMascots = <String, List<MascotShapeRow>>{
+final Map<String, List<MascotShapeRow>> kTracedMascots = <String, List<MascotShapeRow>>{
   'bunny': kTracedBunny,
   'cat': kTracedCat,
   'red_panda': kTracedRedPanda,
