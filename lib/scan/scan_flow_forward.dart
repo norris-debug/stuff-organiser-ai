@@ -32,6 +32,21 @@ part of 'scan_flow.dart';
 /// email text to the browser's Web Share API (the share sheet opens
 /// with the photos already attached on supporting browsers); the
 /// prefilled mailto compose stays as the fallback.
+/// v0.8.29 (route B, steward ruling): the package rides to BOTH
+/// processing lanes in one send - the coach's receive mailbox (renders +
+/// the item list) and the recognition mailbox (the tiered read). The
+/// recipients carry as one shared constant list: the mailto fallback
+/// pre-addresses both, and every labeling line names both. The payload
+/// format and the subject pattern are unchanged, so both mailboxes keep
+/// filtering on the same subject.
+
+/// v0.8.29: the forward package's recipients - both processing lanes in
+/// one package. The coach's mailbox returns the renders and the item
+/// list; the recognition mailbox returns the tiered read.
+const String forwardRecipientCellulose = 'afantashoon@gmail.com';
+const String forwardRecipientRecognition = 'chlorophyll@hellominds.ai';
+const String forwardRecipients =
+    '$forwardRecipientCellulose,$forwardRecipientRecognition';
 
 /// The attached photos as share files, named in upload order.
 List<XFile> _forwardFiles(List<Uint8List> bytes, List<String> mimes) {
@@ -94,7 +109,7 @@ Future<String> launchForwardPackage({
     // v0.8.21 web primary path: the Web Share API hands the photos and
     // the prefilled email text to the browser's share sheet - on
     // supporting browsers the compose opens with the photos already
-    // attached (add the recipient and send). The prefilled mailto
+    // attached (add the recipients and send). The prefilled mailto
     // compose (v0.8.19/20) stays as the fallback for browsers without
     // Web Share Level 2.
     final bool shared = await sharePhotosViaWebShare(
@@ -105,32 +120,37 @@ Future<String> launchForwardPackage({
     );
     if (shared) {
       return 'Share sheet opened - the scanned photos are already '
-          'attached. Pick your email app, add afantashoon@gmail.com (the '
-          "coach's receive mailbox) as the recipient, then press Send. "
-          'Renders and the recognized item list arrive by email.';
+          'attached. Pick your email app, add both processing lanes as '
+          'the recipients - $forwardRecipientCellulose (the coach\'s '
+          'receive mailbox, renders + item list) and '
+          '$forwardRecipientRecognition (the recognition mailbox) - then '
+          'press Send. Renders and the recognized item list arrive by '
+          'email.';
     }
     // Web fallback: open a real email compose with the package prefilled
-    // and pre-addressed to the coach's receive mailbox (v0.8.19). The
-    // photos ride by hand (browsers cannot attach files for us), so
-    // the labeling says exactly that - v0.8.20 names the paperclip
-    // step explicitly, since the implied version was missed on the
-    // first live scan.
+    // and pre-addressed to both processing lanes (v0.8.29). The photos
+    // ride by hand (browsers cannot attach files for us), so the
+    // labeling says exactly that - the paperclip step is named
+    // explicitly, since the implied version was missed on the first
+    // live scan.
     final String mailto =
-        'mailto:afantashoon@gmail.com?subject=${Uri.encodeComponent(subject)}'
+        'mailto:$forwardRecipients?subject=${Uri.encodeComponent(subject)}'
         '&body=${Uri.encodeComponent(body)}';
     try {
       openMailCompose(Uri.parse(mailto));
-      return "Email compose opened - addressed to afantashoon@gmail.com, "
-          "the coach's receive mailbox. Browsers cannot attach the photos "
-          "for you: tap the paperclip in the email window, add the scanned "
-          "photos in upload order (photo 1 first), then press Send. "
-          "Renders and the recognized item list arrive by email.";
+      return 'Email compose opened - addressed to both processing lanes '
+          '($forwardRecipientCellulose + $forwardRecipientRecognition). '
+          'Browsers cannot attach the photos for you: tap the paperclip '
+          'in the email window, add the scanned photos in upload order '
+          '(photo 1 first), then press Send. Renders and the recognized '
+          'item list arrive by email.';
     } catch (_) {
       await Clipboard.setData(ClipboardData(text: body));
-      return "This browser could not open an email compose - the package "
-          "body is copied. Paste it into an email to afantashoon@gmail.com "
-          "(the coach's receive mailbox), attach the photos by hand in "
-          "upload order (photo 1 first), then send.";
+      return 'This browser could not open an email compose - the package '
+          'body is copied. Paste it into an email addressed to '
+          '$forwardRecipientCellulose and $forwardRecipientRecognition '
+          '(both processing lanes), attach the photos by hand in upload '
+          'order (photo 1 first), then send.';
     }
   }
   final List<XFile> files = _forwardFiles(photoBytes, photoMimes);
