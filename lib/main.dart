@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'debug/qa_tools.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/splash_screen.dart';
 import 'services/auth_service.dart';
 import 'services/data_service.dart';
 import 'state/app_state.dart';
@@ -108,7 +109,14 @@ class StuffOrganiserApp extends StatelessWidget {
             title: 'Stuff Organiser AI',
             debugShowCheckedModeBanner: false,
             theme: buildAppTheme(state.themePack),
-            home: state.onboardingComplete ? const HomeShell() : const OnboardingScreen(),
+            // v0.8.30: opening screen - brand lock-up on white holds ~2.2s
+            // (tap to skip), then fades into the flow beneath; the child
+            // builds from frame one so dashboard tests stay untouched.
+            home: SplashGate(
+              child: state.onboardingComplete
+                  ? const HomeShell()
+                  : const OnboardingScreen(),
+            ),
           );
         },
       ),
