@@ -1,4 +1,4 @@
-stuff_organiser_ai
+name: stuff_organiser_ai
 description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
