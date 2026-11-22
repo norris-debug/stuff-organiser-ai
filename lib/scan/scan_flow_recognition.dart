@@ -43,6 +43,15 @@ bool _isDigitChar(String c) {
 /// commas/semicolons and each piece runs through the same per-line
 /// parse; the documented lane shape (one object per line, exactly one
 /// confidence marker) is byte-identical to the old path.
+/// v0.8.32 (QA F8): the multi-marker split set extends to the slash
+/// family - a multi-'%' line with no comma or semicolon ("loose papers
+/// 92% / notebooks 60% / collar tag 40%") used to fall through to the
+/// single-label parse: one merged confirmed item, the head label
+/// dropped by the head-vs-tail rule, the leading "/" surviving the
+/// strip set (filed ×2 on 0.8.28+48, 2026-11-22). The split set now
+/// covers [,;/] and "/" joins the leading-strip set. The zero-marker
+/// plain-list rule is unchanged - a slash-only list with no '%' still
+/// parses as one label.
 List<_RecognizedObject> _parseRecognition(String raw) {
   final List<_RecognizedObject> items = <_RecognizedObject>[];
   final Set<String> seen = <String>{};
@@ -54,7 +63,7 @@ List<_RecognizedObject> _parseRecognition(String raw) {
         pctCount == 0 && (line.contains(',') || line.contains(';'));
     if (plainList || pctCount > 1) {
       bool splitAnything = false;
-      for (final String piece in line.split(RegExp('[,;]'))) {
+      for (final String piece in line.split(RegExp('[,;/]'))) {
         final String trimmed = piece.trim();
         if (trimmed.length < 3) continue;
         _parseRecognitionLine(trimmed, items, seen);
@@ -155,6 +164,7 @@ void _parseRecognitionLine(
         c == ',' ||
         c == '.' ||
         c == '%' ||
+        c == '/' ||
         c == '(' ||
         c == '[' ||
         c == ' ') {

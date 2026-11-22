@@ -506,4 +506,85 @@ void main() {
       isTrue,
     );
   });
+
+  testWidgets(
+      'scan flow: a multi-slash confidence line splits into real items (QA F8)',
+      (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final AppState state = _demoState(prefs);
+
+    ImagePickerPlatform.instance = _FakeImagePicker(<XFile>[
+      XFile.fromData(
+        base64Decode(_kPng1x1),
+        name: 'photo-1.jpg',
+        mimeType: 'image/jpeg',
+      ),
+    ]);
+
+    await tester.pumpWidget(_host(
+      ScanFlowScreen(
+        prefs: prefs,
+        mascot: MascotVariant.bunny,
+        pack: themePacks.first,
+        appState: state,
+      ),
+    ));
+    await tester.pump();
+
+    await tester.tap(find.text('Bedroom'));
+    await tester.pump();
+    await tester.tap(find.text('Gallery'));
+    await tester.pump();
+    await tester.scrollUntilVisible(
+      find.text('Next'),
+      160,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Paste recognized list'));
+    await tester.pump();
+    await tester.tap(find.text('Paste recognized list'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // v0.8.32 (QA F8): the canonical slash line - three confidence reads
+    // separated by '/' with no comma or semicolon anywhere. It used to
+    // fall through to the single-label parse: one merged confirmed item,
+    // head 'loose papers' dropped, leading '/' surviving the strip set.
+    await tester.enterText(
+      find.byType(TextField),
+      'loose papers 92% / notebooks 60% / collar tag 40%',
+    );
+    await tester.tap(find.text('Coach from this'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    int revealGuard = 0;
+    while (find.text('Next').evaluate().isNotEmpty) {
+      revealGuard++;
+      if (revealGuard > 40) {
+        break;
+      }
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
+    }
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // State-side pin: three reads became three real items - confirmed and
+    // verify landed, the flagged read stayed out by design, and no merged
+    // '/ ...' label survived anywhere in the landed names.
+    final Set<String> names = state.items.map((item) => item.name).toSet();
+    expect(names, containsAll(<String>['loose papers', 'notebooks']));
+    expect(names, isNot(contains('collar tag')));
+    expect(names.any((String n) => n.contains('/')), isFalse);
+  });
 }
