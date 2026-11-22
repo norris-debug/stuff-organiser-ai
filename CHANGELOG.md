@@ -2,6 +2,12 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.30+50 - 2026-11-22
+
+- Opening screen: the app now opens on the team logo splash - the keyed logo on white holds about 2.2 seconds, tap to skip, and the dashboard builds from frame one beneath the overlay so the skip lands instantly (design: Leaf's comp set, wired per the handoff).
+- Logo asset: palette-cut keyed PNG (16-color, hard alpha, 9.8KB) with the background drawn in code, so a later background-color swap needs no new asset.
+- Splash gate pinned by a dedicated widget test: the ~2.2s hold, the tap-skip release, and the dashboard child mounting from frame one.
+
 ## v0.8.29+49 - 2026-11-22
 
 - Dual-lane scan forward (Route B - Herrick's ruling): the forward now carries both processing lanes in one package - the web compose pre-addresses the render lane (afantashoon@gmail.com) and the recognition lane (chlorophyll@hellominds.ai) together, and the share-sheet / clipboard fallback labels name both lanes, so one send dispatches the package to renders and recognition at once.
