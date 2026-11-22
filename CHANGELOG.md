@@ -2,6 +2,17 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.28+48 - 2026-11-22
+
+- Coach chat: the tidy-plan reveal is announced - each newly revealed coach line carries a live region (aria-live polite) so screen readers hear the plan build line by line as Next is tapped (R7-F2, retargeted to the measured tap-gated reveal path; the staging-only "coach is drafting" status was dropped after run #20 measured no wait).
+- Copy fix: the empty-venue intro reads "Looking at your space" instead of "Looking at the this space" (R7-F3).
+- Paste intake: a recognition list packed onto one line (comma/semicolon separated, with or without per-item confidence) is split into its items before the plan is drafted - the old per-label 60-character cap silently chopped such lines to their first 60 characters, dropping every item past that point (QA R8-F4, confirmed ×2 live on 0.8.27).
+- Copy coherence: the tidy intro no longer pairs "Tidy" with the hands-on actions tail - it reads "Here are N concrete actions to keep it that way." (QA R8-F5; the severity word itself is input-gated by item count and unchanged).
+
+## v0.8.27+47 - 2026-11-21
+
+- Accessibility: the scan pick-stage Next button serializes as exactly one accessible node with an explicit enabled/disabled state applied at the render level (dissolves the R7-F1 duplicate-Next read by design; R6-F2 aria-disabled target). No visual or behavioral changes.
+
 ## v0.8.26+46 - 2026-11-20
 
 - Semantics merge (Meiosis R6-F2): the scan pick stage's disabled Next now merges its button role and enabled state onto ONE accessibility node (container:true + button:true + the enabled flag) - the bare parent wrap from v0.8.24 landed role and enabled on separate nodes, so web automation and screen readers read neither as aria-disabled at zero photos / while analysing. The R4-F1 badge fix stays closed (replicated 2/2 in R6); the debug-only sample-photos affordance is unchanged.
