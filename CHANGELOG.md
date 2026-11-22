@@ -2,6 +2,13 @@
 
 Continues from the changelog sections in README.md (v0.1 - v0.5).
 
+## v0.8.29+49 - 2026-11-22
+
+- Dual-lane scan forward (Route B - Herrick's ruling): the forward now carries both processing lanes in one package - the web compose pre-addresses the render lane (afantashoon@gmail.com) and the recognition lane (chlorophyll@hellominds.ai) together, and the share-sheet / clipboard fallback labels name both lanes, so one send dispatches the package to renders and recognition at once.
+- README: the forward-route documentation now describes the dual-lane delivery.
+
+The payload format is unchanged from v0.8.18 (photos in upload order with the order-pinning body line, the venue, the typed notes, and the scan ID in the subject line); no other behavior changes.
+
 ## v0.8.28+48 - 2026-11-22
 
 - Coach chat: the tidy-plan reveal is announced - each newly revealed coach line carries a live region (aria-live polite) so screen readers hear the plan build line by line as Next is tapped (R7-F2, retargeted to the measured tap-gated reveal path; the staging-only "coach is drafting" status was dropped after run #20 measured no wait).
