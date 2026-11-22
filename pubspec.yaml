@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.29+49
+version: 0.8.30+50
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -200,3 +200,12 @@ flutter:
 # recognition mailbox (the tiered read). The mailto fallback
 # pre-addresses both; the share-sheet and clipboard labeling name both;
 # the payload format and the subject pattern are unchanged.
+# v0.8.30+50: opening-screen splash (steward request 2026-11-21; logo by
+# Leaf) - the app opens on the keyed brand lock-up
+# (assets/branding/logo.png, palette-cut keyed PNG) centered on white,
+# holds ~2.2 seconds (tap anywhere skips) and fades into the flow; the
+# gated child builds from frame one beneath the overlay (SplashGate
+# wraps home in main.dart), so startup work and the dashboard tests
+# stay untouched; white stays the staged default - the mint swap is one
+# asset + hex change; a widget test pins the gate contract (hold
+# timing, tap-skip release, child from frame one).
