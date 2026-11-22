@@ -3,7 +3,7 @@ description: >-
   Stuff Organiser AI - a near-zero-friction organiser for household items and
   real paper piles. Runs in demo mode without Firebase credentials.
 publish_to: "none"
-version: 0.8.31+51
+version: 0.8.32+52
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
