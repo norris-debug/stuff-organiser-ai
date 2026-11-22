@@ -9,6 +9,7 @@ import 'mascot_paths_5.dart';
 import 'mascot_paths_6.dart';
 import 'mascot_paths_7.dart';
 import 'mascot_paths_8.dart';
+import 'mascot_paths_anime.dart';
 
 class MascotShapeRow {
   const MascotShapeRow(this.fill, this.opacity, this.d);
@@ -129,9 +130,9 @@ const Map<String, List<MascotShapeRow>> kTracedMascots = <String, List<MascotSha
   'cake': kTracedCake,
   'salad': kTracedSalad,
   'pizza': kTracedPizza,
-  'anime_blindfolded': kTracedBlindfolded,
-  'anime_straw_hat': kTracedStrawHat,
-  'anime_twin_tails': kTracedTwinTails,
-  'anime_glasses_boy': kTracedGlassesBoy,
-  'anime_bob_cut': kTracedBobCut,
+  'anime_blindfolded': kTracedBlindfoldedR6,
+  'anime_straw_hat': kTracedStrawHatR6,
+  'anime_twin_tails': kTracedTwinTailsR6,
+  'anime_glasses_boy': kTracedGlassesBoyR6,
+  'anime_bob_cut': kTracedBobCutR6,
 };
